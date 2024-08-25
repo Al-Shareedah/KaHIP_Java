@@ -4,6 +4,7 @@ import org.alshar.lib.io.GraphIO;
 import org.alshar.app.ParseParameters;
 import org.alshar.lib.data_structure.GraphAccess;
 import org.alshar.lib.partition.PartitionConfig;
+import org.alshar.lib.tools.RandomFunctions;
 import org.alshar.lib.tools.Timer;
 
 import java.io.FileOutputStream;
@@ -50,5 +51,13 @@ public class Main {
         BalanceConfiguration bc = new BalanceConfiguration();
         bc.configurateBalance(partitionConfig, G);
 
+        // Set random seed
+        RandomFunctions.setSeed(partitionConfig.getSeed());
+
+        // Output graph details
+        System.out.println("Graph has " + G.numberOfNodes() + " nodes and " + G.numberOfEdges() + " edges");
+
+        // Restart the timer
+        t.restart();
     }
 }

@@ -6,58 +6,225 @@ import org.alshar.lib.enums.*;
 
 public class PartitionConfig {
 
-    public EdgeRating getEdgeRating() {
-        return edgeRating;
-    }
-
-    public List<Integer> getGroupSizes() {
-        return groupSizes;
-    }
-
-    public boolean isUseMmapIo() {
-        return useMmapIo;
-    }
-
-    public List<Integer> getDistances() {
-        return distances;
-    }
-
-    public PermutationQuality getPermutationQuality() {
-        return permutationQuality;
-    }
-
-    public MatchingType getMatchingType() {
-        return matchingType;
-    }
-
-    public boolean isFirstLevelRandomMatching() {
-        return firstLevelRandomMatching;
-    }
-
-    public int getAggressiveRandomLevels() {
-        return aggressiveRandomLevels;
-    }
-
-    public boolean isRateFirstLevelInnerOuter() {
-        return rateFirstLevelInnerOuter;
-    }
-
-    public int getK() {
-        return k;
-    }
-
-    public boolean isModeNodeSeparators() {
-        return this.modeNodeSeparators;
-    }
-
-    public PreConfigMapping getPreconfigurationMapping() {
-        return preconfigurationMapping;
-    }
 
     public PartitionConfig() {
         this.groupSizes = new ArrayList<>();
         this.distances = new ArrayList<>();
     }
+    // Copy constructor
+    public PartitionConfig(PartitionConfig other) {
+        this.useMmapIo = other.useMmapIo;
+
+        // Copying Matching related fields
+        this.edgeRatingTiebreaking = other.edgeRatingTiebreaking;
+        this.edgeRating = other.edgeRating;
+        this.permutationQuality = other.permutationQuality;
+        this.matchingType = other.matchingType;
+        this.matchIslands = other.matchIslands;
+        this.firstLevelRandomMatching = other.firstLevelRandomMatching;
+        this.rateFirstLevelInnerOuter = other.rateFirstLevelInnerOuter;
+        this.maxVertexWeight = other.maxVertexWeight;
+        this.largestGraphWeight = other.largestGraphWeight;
+        this.workLoad = other.workLoad;
+        this.aggressiveRandomLevels = other.aggressiveRandomLevels;
+        this.disableMaxVertexWeightConstraint = other.disableMaxVertexWeightConstraint;
+
+        // Initial Partitioning fields
+        this.initialPartitioningRepetitions = other.initialPartitioningRepetitions;
+        this.minipreps = other.minipreps;
+        this.refinedBubbling = other.refinedBubbling;
+        this.initialPartitioningType = other.initialPartitioningType;
+        this.initialPartitionOptimize = other.initialPartitionOptimize;
+        this.bipartitionAlgorithm = other.bipartitionAlgorithm;
+        this.initialPartitioning = other.initialPartitioning;
+        this.bipartitionTries = other.bipartitionTries;
+        this.bipartitionPostFmLimits = other.bipartitionPostFmLimits;
+        this.bipartitionPostMlLimits = other.bipartitionPostMlLimits;
+
+        // Refinement parameters
+        this.cornerRefinementEnabled = other.cornerRefinementEnabled;
+        this.useBucketQueues = other.useBucketQueues;
+        this.refinementType = other.refinementType;
+        this.permutationDuringRefinement = other.permutationDuringRefinement;
+        this.imbalance = other.imbalance;
+        this.bubblingIterations = other.bubblingIterations;
+        this.kwayRounds = other.kwayRounds;
+        this.quotientGraphRefinementDisabled = other.quotientGraphRefinementDisabled;
+        this.kwayStopRule = other.kwayStopRule;
+        this.kwayAdaptiveLimitsAlpha = other.kwayAdaptiveLimitsAlpha;
+        this.kwayAdaptiveLimitsBeta = other.kwayAdaptiveLimitsBeta;
+        this.maxFlowIterations = other.maxFlowIterations;
+        this.localMultitryRounds = other.localMultitryRounds;
+        this.localMultitryFmAlpha = other.localMultitryFmAlpha;
+        this.graphAlreadyPartitioned = other.graphAlreadyPartitioned;
+        this.fmSearchLimit = other.fmSearchLimit;
+        this.kwayFmSearchLimit = other.kwayFmSearchLimit;
+        this.upperBoundPartition = other.upperBoundPartition;
+        this.bankAccountFactor = other.bankAccountFactor;
+        this.refinementSchedulingAlgorithm = other.refinementSchedulingAlgorithm;
+        this.mostBalancedMinimumCuts = other.mostBalancedMinimumCuts;
+        this.mostBalancedMinimumCutsNodeSep = other.mostBalancedMinimumCutsNodeSep;
+        this.toposortIterations = other.toposortIterations;
+        this.softRebalance = other.softRebalance;
+        this.rebalance = other.rebalance;
+        this.flowRegionFactor = other.flowRegionFactor;
+        this.gpaGrowPathsBetweenBlocks = other.gpaGrowPathsBetweenBlocks;
+
+        // Global search parameters
+        this.globalCycleIterations = other.globalCycleIterations;
+        this.useWcycles = other.useWcycles;
+        this.useFullMultigrid = other.useFullMultigrid;
+        this.levelSplit = other.levelSplit;
+        this.noNewInitialPartitioning = other.noNewInitialPartitioning;
+        this.omitGivenPartitioning = other.omitGivenPartitioning;
+        this.stopRule = other.stopRule;
+        this.numVertStopFactor = other.numVertStopFactor;
+        this.noChangeConvergence = other.noChangeConvergence;
+
+        // Perfectly balanced partitioning
+        this.removeNegativeCycles = other.removeNegativeCycles;
+        this.kabaIncludeRemovalOfPaths = other.kabaIncludeRemovalOfPaths;
+        this.kabaEnableZeroWeightCycles = other.kabaEnableZeroWeightCycles;
+        this.kabaEInternalBal = other.kabaEInternalBal;
+        this.cycleRefinementAlgorithm = other.cycleRefinementAlgorithm;
+        this.kabaInternalNoAugStepsAug = other.kabaInternalNoAugStepsAug;
+        this.kabaPackingIterations = other.kabaPackingIterations;
+        this.kabaFlipPackings = other.kabaFlipPackings;
+        this.kabaLsearchP = other.kabaLsearchP;
+        this.kaffpaPerfectlyBalancedRefinement = other.kaffpaPerfectlyBalancedRefinement;
+        this.kabaUnsuccIterations = other.kabaUnsuccIterations;
+
+        // PAR_PSEUDOMH / MH
+        this.timeLimit = other.timeLimit;
+        this.epsilon = other.epsilon;
+        this.noUnsucReps = other.noUnsucReps;
+        this.localPartitioningRepetitions = other.localPartitioningRepetitions;
+        this.mhPlainRepetitions = other.mhPlainRepetitions;
+        this.mhEasyConstruction = other.mhEasyConstruction;
+        this.mhEnableGalCombine = other.mhEnableGalCombine;
+        this.mhNoMh = other.mhNoMh;
+        this.mhPrintLog = other.mhPrintLog;
+        this.mhFlipCoin = other.mhFlipCoin;
+        this.mhInitialPopulationFraction = other.mhInitialPopulationFraction;
+        this.mhDisableCrossCombine = other.mhDisableCrossCombine;
+        this.mhCrossCombineOriginalK = other.mhCrossCombineOriginalK;
+        this.mhDisableNcCombine = other.mhDisableNcCombine;
+        this.mhDisableCombine = other.mhDisableCombine;
+        this.mhEnableQuickstart = other.mhEnableQuickstart;
+        this.mhDisableDiversifyIslands = other.mhDisableDiversifyIslands;
+        this.mhDiversify = other.mhDiversify;
+        this.mhDiversifyBest = other.mhDiversifyBest;
+        this.mhEnableTournamentSelection = other.mhEnableTournamentSelection;
+        this.mhOptimizeCommunicationVolume = other.mhOptimizeCommunicationVolume;
+        this.mhNumNcsToCompute = other.mhNumNcsToCompute;
+        this.mhPoolSize = other.mhPoolSize;
+        this.combine = other.combine;
+        this.initialPartitionOptimizeFmLimits = other.initialPartitionOptimizeFmLimits;
+        this.initialPartitionOptimizeMultitryFmAlpha = other.initialPartitionOptimizeMultitryFmAlpha;
+        this.initialPartitionOptimizeMultitryRounds = other.initialPartitionOptimizeMultitryRounds;
+        this.walshawMhRepetitions = other.walshawMhRepetitions;
+        this.scalingFactor = other.scalingFactor;
+        this.scaleBack = other.scaleBack;
+        this.suppressPartitionerOutput = other.suppressPartitionerOutput;
+        this.maxT = other.maxT;
+        this.maxIter = other.maxIter;
+
+        // Buffoon
+        this.disableHardRebalance = other.disableHardRebalance;
+        this.buffoon = other.buffoon;
+        this.kabapE = other.kabapE;
+        this.mhPenaltyForUnconnected = other.mhPenaltyForUnconnected;
+
+        // Miscellaneous
+        this.inputPartition = other.inputPartition;
+        this.seed = other.seed;
+        this.fast = other.fast;
+        this.eco = other.eco;
+        this.strong = other.strong;
+        this.kaffpaE = other.kaffpaE;
+        this.balanceEdges = other.balanceEdges;
+        this.k = other.k;
+        this.computeVertexSeparator = other.computeVertexSeparator;
+        this.onlyFirstLevel = other.onlyFirstLevel;
+        this.useBalanceSingletons = other.useBalanceSingletons;
+        this.amgIterations = other.amgIterations;
+        this.graphFilename = other.graphFilename;
+        this.filenameOutput = other.filenameOutput;
+        this.kaffpaPerfectlyBalance = other.kaffpaPerfectlyBalance;
+        this.modeNodeSeparators = other.modeNodeSeparators;
+
+        // SNW Partitioning
+        this.nodeOrdering = other.nodeOrdering;
+        this.clusterCoarseningFactor = other.clusterCoarseningFactor;
+        this.ensembleClusterings = other.ensembleClusterings;
+        this.labelIterations = other.labelIterations;
+        this.labelIterationsRefinement = other.labelIterationsRefinement;
+        this.numberOfClusterings = other.numberOfClusterings;
+        this.labelPropagationRefinement = other.labelPropagationRefinement;
+        this.balanceFactor = other.balanceFactor;
+        this.clusterCoarseningDuringIp = other.clusterCoarseningDuringIp;
+        this.setUpperbound = other.setUpperbound;
+        this.repetitions = other.repetitions;
+
+        // Node Separator
+        this.maxFlowImprovSteps = other.maxFlowImprovSteps;
+        this.maxInitialNsTries = other.maxInitialNsTries;
+        this.regionFactorNodeSeparators = other.regionFactorNodeSeparators;
+        this.sepFlowsDisabled = other.sepFlowsDisabled;
+        this.sepFmDisabled = other.sepFmDisabled;
+        this.sepLocFmDisabled = other.sepLocFmDisabled;
+        this.sepLocFmNoSnodes = other.sepLocFmNoSnodes;
+        this.sepGreedyDisabled = other.sepGreedyDisabled;
+        this.sepFmUnsuccSteps = other.sepFmUnsuccSteps;
+        this.sepLocFmUnsuccSteps = other.sepLocFmUnsuccSteps;
+        this.sepNumFmReps = other.sepNumFmReps;
+        this.sepNumLocFmReps = other.sepNumLocFmReps;
+        this.sepNumVertStop = other.sepNumVertStop;
+        this.sepFullBoundaryIp = other.sepFullBoundaryIp;
+        this.fasterNs = other.fasterNs;
+        this.sepEdgeRatingDuringIp = other.sepEdgeRatingDuringIp;
+
+        // Label Propagation
+        this.clusterUpperbound = other.clusterUpperbound;
+
+        // Initial Partitioning
+        this.targetWeights = new ArrayList<>(other.targetWeights);
+        this.initialBipartitioning = other.initialBipartitioning;
+        this.growTarget = other.growTarget;
+
+        // ILP Local Search
+        this.ilpMode = other.ilpMode;
+        this.ilpMinGain = other.ilpMinGain;
+        this.ilpBfsDepth = other.ilpBfsDepth;
+        this.ilpBfsMinGain = other.ilpBfsMinGain;
+        this.ilpOverlapPresets = other.ilpOverlapPresets;
+        this.ilpLimitNonzeroes = other.ilpLimitNonzeroes;
+        this.ilpOverlapRuns = other.ilpOverlapRuns;
+        this.ilpTimeout = other.ilpTimeout;
+
+        // QAP
+        this.communicationNeighborhoodDist = other.communicationNeighborhoodDist;
+        this.lsNeighborhood = other.lsNeighborhood;
+        this.constructionAlgorithm = other.constructionAlgorithm;
+        this.distanceConstructionAlgorithm = other.distanceConstructionAlgorithm;
+        this.groupSizes = new ArrayList<>(other.groupSizes);
+        this.distances = new ArrayList<>(other.distances);
+        this.searchSpaceS = other.searchSpaceS;
+        this.preconfigurationMapping = other.preconfigurationMapping;
+        this.maxRecursionLevelsConstruction = other.maxRecursionLevelsConstruction;
+        this.enableMapping = other.enableMapping;
+
+        // Node Ordering
+        this.dissectionRecLimit = other.dissectionRecLimit;
+        this.disableReductions = other.disableReductions;
+        this.reductionOrder = new ArrayList<>(other.reductionOrder);
+        this.convergenceFactor = other.convergenceFactor;
+        this.maxSimplicialDegree = other.maxSimplicialDegree;
+
+        // Shared Mem OMP
+        this.enableOmp = other.enableOmp;
+    }
+
 
     public boolean useMmapIo;
 
@@ -467,6 +634,7 @@ public class PartitionConfig {
     // ===============Shared Mem OMP======================
     // ===================================================
     public boolean enableOmp;
+
 
     public void logDump(java.io.File out) {
         // Implementation for logging the config if needed
@@ -1183,6 +1351,716 @@ public class PartitionConfig {
     public void setEnableOmp(boolean enableOmp) {
         this.enableOmp = enableOmp;
     }
+    public boolean isUseMmapIo() {
+        return useMmapIo;
+    }
 
+    public boolean isEdgeRatingTiebreaking() {
+        return edgeRatingTiebreaking;
+    }
+
+    public EdgeRating getEdgeRating() {
+        return edgeRating;
+    }
+
+    public PermutationQuality getPermutationQuality() {
+        return permutationQuality;
+    }
+
+    public MatchingType getMatchingType() {
+        return matchingType;
+    }
+
+    public boolean isMatchIslands() {
+        return matchIslands;
+    }
+
+    public boolean isFirstLevelRandomMatching() {
+        return firstLevelRandomMatching;
+    }
+
+    public boolean isRateFirstLevelInnerOuter() {
+        return rateFirstLevelInnerOuter;
+    }
+
+    public int getMaxVertexWeight() {
+        return maxVertexWeight;
+    }
+
+    public int getLargestGraphWeight() {
+        return largestGraphWeight;
+    }
+
+    public int getWorkLoad() {
+        return workLoad;
+    }
+
+    public int getAggressiveRandomLevels() {
+        return aggressiveRandomLevels;
+    }
+
+    public boolean isDisableMaxVertexWeightConstraint() {
+        return disableMaxVertexWeightConstraint;
+    }
+
+    public int getInitialPartitioningRepetitions() {
+        return initialPartitioningRepetitions;
+    }
+
+    public int getMinipreps() {
+        return minipreps;
+    }
+
+    public boolean isRefinedBubbling() {
+        return refinedBubbling;
+    }
+
+    public InitialPartitioningType getInitialPartitioningType() {
+        return initialPartitioningType;
+    }
+
+    public boolean isInitialPartitionOptimize() {
+        return initialPartitionOptimize;
+    }
+
+    public BipartitionAlgorithm getBipartitionAlgorithm() {
+        return bipartitionAlgorithm;
+    }
+
+    public boolean isInitialPartitioning() {
+        return initialPartitioning;
+    }
+
+    public int getBipartitionTries() {
+        return bipartitionTries;
+    }
+
+    public int getBipartitionPostFmLimits() {
+        return bipartitionPostFmLimits;
+    }
+
+    public int getBipartitionPostMlLimits() {
+        return bipartitionPostMlLimits;
+    }
+
+    public boolean isCornerRefinementEnabled() {
+        return cornerRefinementEnabled;
+    }
+
+    public boolean isUseBucketQueues() {
+        return useBucketQueues;
+    }
+
+    public RefinementType getRefinementType() {
+        return refinementType;
+    }
+
+    public PermutationQuality getPermutationDuringRefinement() {
+        return permutationDuringRefinement;
+    }
+
+    public double getImbalance() {
+        return imbalance;
+    }
+
+    public int getBubblingIterations() {
+        return bubblingIterations;
+    }
+
+    public int getKwayRounds() {
+        return kwayRounds;
+    }
+
+    public boolean isQuotientGraphRefinementDisabled() {
+        return quotientGraphRefinementDisabled;
+    }
+
+    public KWayStopRule getKwayStopRule() {
+        return kwayStopRule;
+    }
+
+    public double getKwayAdaptiveLimitsAlpha() {
+        return kwayAdaptiveLimitsAlpha;
+    }
+
+    public double getKwayAdaptiveLimitsBeta() {
+        return kwayAdaptiveLimitsBeta;
+    }
+
+    public int getMaxFlowIterations() {
+        return maxFlowIterations;
+    }
+
+    public int getLocalMultitryRounds() {
+        return localMultitryRounds;
+    }
+
+    public int getLocalMultitryFmAlpha() {
+        return localMultitryFmAlpha;
+    }
+
+    public boolean isGraphAlreadyPartitioned() {
+        return graphAlreadyPartitioned;
+    }
+
+    public int getFmSearchLimit() {
+        return fmSearchLimit;
+    }
+
+    public int getKwayFmSearchLimit() {
+        return kwayFmSearchLimit;
+    }
+
+    public int getUpperBoundPartition() {
+        return upperBoundPartition;
+    }
+
+    public double getBankAccountFactor() {
+        return bankAccountFactor;
+    }
+
+    public RefinementSchedulingAlgorithm getRefinementSchedulingAlgorithm() {
+        return refinementSchedulingAlgorithm;
+    }
+
+    public boolean isMostBalancedMinimumCuts() {
+        return mostBalancedMinimumCuts;
+    }
+
+    public boolean isMostBalancedMinimumCutsNodeSep() {
+        return mostBalancedMinimumCutsNodeSep;
+    }
+
+    public int getToposortIterations() {
+        return toposortIterations;
+    }
+
+    public boolean isSoftRebalance() {
+        return softRebalance;
+    }
+
+    public boolean isRebalance() {
+        return rebalance;
+    }
+
+    public double getFlowRegionFactor() {
+        return flowRegionFactor;
+    }
+
+    public boolean isGpaGrowPathsBetweenBlocks() {
+        return gpaGrowPathsBetweenBlocks;
+    }
+
+    public int getGlobalCycleIterations() {
+        return globalCycleIterations;
+    }
+
+    public boolean isUseWcycles() {
+        return useWcycles;
+    }
+
+    public boolean isUseFullMultigrid() {
+        return useFullMultigrid;
+    }
+
+    public int getLevelSplit() {
+        return levelSplit;
+    }
+
+    public boolean isNoNewInitialPartitioning() {
+        return noNewInitialPartitioning;
+    }
+
+    public boolean isOmitGivenPartitioning() {
+        return omitGivenPartitioning;
+    }
+
+    public StopRule getStopRule() {
+        return stopRule;
+    }
+
+    public int getNumVertStopFactor() {
+        return numVertStopFactor;
+    }
+
+    public boolean isNoChangeConvergence() {
+        return noChangeConvergence;
+    }
+
+    public boolean isRemoveNegativeCycles() {
+        return removeNegativeCycles;
+    }
+
+    public boolean isKabaIncludeRemovalOfPaths() {
+        return kabaIncludeRemovalOfPaths;
+    }
+
+    public boolean isKabaEnableZeroWeightCycles() {
+        return kabaEnableZeroWeightCycles;
+    }
+
+    public double getKabaEInternalBal() {
+        return kabaEInternalBal;
+    }
+
+    public CycleRefinementAlgorithm getCycleRefinementAlgorithm() {
+        return cycleRefinementAlgorithm;
+    }
+
+    public int getKabaInternalNoAugStepsAug() {
+        return kabaInternalNoAugStepsAug;
+    }
+
+    public int getKabaPackingIterations() {
+        return kabaPackingIterations;
+    }
+
+    public boolean isKabaFlipPackings() {
+        return kabaFlipPackings;
+    }
+
+    public MLSRule getKabaLsearchP() {
+        return kabaLsearchP;
+    }
+
+    public boolean isKaffpaPerfectlyBalancedRefinement() {
+        return kaffpaPerfectlyBalancedRefinement;
+    }
+
+    public int getKabaUnsuccIterations() {
+        return kabaUnsuccIterations;
+    }
+
+    public double getTimeLimit() {
+        return timeLimit;
+    }
+
+    public double getEpsilon() {
+        return epsilon;
+    }
+
+    public int getNoUnsucReps() {
+        return noUnsucReps;
+    }
+
+    public int getLocalPartitioningRepetitions() {
+        return localPartitioningRepetitions;
+    }
+
+    public boolean isMhPlainRepetitions() {
+        return mhPlainRepetitions;
+    }
+
+    public boolean isMhEasyConstruction() {
+        return mhEasyConstruction;
+    }
+
+    public boolean isMhEnableGalCombine() {
+        return mhEnableGalCombine;
+    }
+
+    public boolean isMhNoMh() {
+        return mhNoMh;
+    }
+
+    public boolean isMhPrintLog() {
+        return mhPrintLog;
+    }
+
+    public int getMhFlipCoin() {
+        return mhFlipCoin;
+    }
+
+    public int getMhInitialPopulationFraction() {
+        return mhInitialPopulationFraction;
+    }
+
+    public boolean isMhDisableCrossCombine() {
+        return mhDisableCrossCombine;
+    }
+
+    public boolean isMhCrossCombineOriginalK() {
+        return mhCrossCombineOriginalK;
+    }
+
+    public boolean isMhDisableNcCombine() {
+        return mhDisableNcCombine;
+    }
+
+    public boolean isMhDisableCombine() {
+        return mhDisableCombine;
+    }
+
+    public boolean isMhEnableQuickstart() {
+        return mhEnableQuickstart;
+    }
+
+    public boolean isMhDisableDiversifyIslands() {
+        return mhDisableDiversifyIslands;
+    }
+
+    public boolean isMhDiversify() {
+        return mhDiversify;
+    }
+
+    public boolean isMhDiversifyBest() {
+        return mhDiversifyBest;
+    }
+
+    public boolean isMhEnableTournamentSelection() {
+        return mhEnableTournamentSelection;
+    }
+
+    public boolean isMhOptimizeCommunicationVolume() {
+        return mhOptimizeCommunicationVolume;
+    }
+
+    public int getMhNumNcsToCompute() {
+        return mhNumNcsToCompute;
+    }
+
+    public int getMhPoolSize() {
+        return mhPoolSize;
+    }
+
+    public boolean isCombine() {
+        return combine;
+    }
+
+    public int getInitialPartitionOptimizeFmLimits() {
+        return initialPartitionOptimizeFmLimits;
+    }
+
+    public int getInitialPartitionOptimizeMultitryFmAlpha() {
+        return initialPartitionOptimizeMultitryFmAlpha;
+    }
+
+    public int getInitialPartitionOptimizeMultitryRounds() {
+        return initialPartitionOptimizeMultitryRounds;
+    }
+
+    public int getWalshawMhRepetitions() {
+        return walshawMhRepetitions;
+    }
+
+    public int getScalingFactor() {
+        return scalingFactor;
+    }
+
+    public boolean isScaleBack() {
+        return scaleBack;
+    }
+
+    public boolean isSuppressPartitionerOutput() {
+        return suppressPartitionerOutput;
+    }
+
+    public int getMaxT() {
+        return maxT;
+    }
+
+    public int getMaxIter() {
+        return maxIter;
+    }
+
+    public boolean isDisableHardRebalance() {
+        return disableHardRebalance;
+    }
+
+    public boolean isBuffoon() {
+        return buffoon;
+    }
+
+    public boolean isKabapE() {
+        return kabapE;
+    }
+
+    public boolean isMhPenaltyForUnconnected() {
+        return mhPenaltyForUnconnected;
+    }
+
+    public String getInputPartition() {
+        return inputPartition;
+    }
+
+    public int getSeed() {
+        return seed;
+    }
+
+    public boolean isFast() {
+        return fast;
+    }
+
+    public boolean isEco() {
+        return eco;
+    }
+
+    public boolean isStrong() {
+        return strong;
+    }
+
+    public boolean isKaffpaE() {
+        return kaffpaE;
+    }
+
+    public boolean isBalanceEdges() {
+        return balanceEdges;
+    }
+
+    public int getK() {
+        return k;
+    }
+
+    public boolean isComputeVertexSeparator() {
+        return computeVertexSeparator;
+    }
+
+    public boolean isOnlyFirstLevel() {
+        return onlyFirstLevel;
+    }
+
+    public boolean isUseBalanceSingletons() {
+        return useBalanceSingletons;
+    }
+
+    public int getAmgIterations() {
+        return amgIterations;
+    }
+
+    public String getGraphFilename() {
+        return graphFilename;
+    }
+
+    public String getFilenameOutput() {
+        return filenameOutput;
+    }
+
+    public boolean isKaffpaPerfectlyBalance() {
+        return kaffpaPerfectlyBalance;
+    }
+
+    public boolean isModeNodeSeparators() {
+        return modeNodeSeparators;
+    }
+
+    public NodeOrderingType getNodeOrdering() {
+        return nodeOrdering;
+    }
+
+    public int getClusterCoarseningFactor() {
+        return clusterCoarseningFactor;
+    }
+
+    public boolean isEnsembleClusterings() {
+        return ensembleClusterings;
+    }
+
+    public int getLabelIterations() {
+        return labelIterations;
+    }
+
+    public int getLabelIterationsRefinement() {
+        return labelIterationsRefinement;
+    }
+
+    public int getNumberOfClusterings() {
+        return numberOfClusterings;
+    }
+
+    public boolean isLabelPropagationRefinement() {
+        return labelPropagationRefinement;
+    }
+
+    public double getBalanceFactor() {
+        return balanceFactor;
+    }
+
+    public boolean isClusterCoarseningDuringIp() {
+        return clusterCoarseningDuringIp;
+    }
+
+    public boolean isSetUpperbound() {
+        return setUpperbound;
+    }
+
+    public int getRepetitions() {
+        return repetitions;
+    }
+
+    public int getMaxFlowImprovSteps() {
+        return maxFlowImprovSteps;
+    }
+
+    public int getMaxInitialNsTries() {
+        return maxInitialNsTries;
+    }
+
+    public double getRegionFactorNodeSeparators() {
+        return regionFactorNodeSeparators;
+    }
+
+    public boolean isSepFlowsDisabled() {
+        return sepFlowsDisabled;
+    }
+
+    public boolean isSepFmDisabled() {
+        return sepFmDisabled;
+    }
+
+    public boolean isSepLocFmDisabled() {
+        return sepLocFmDisabled;
+    }
+
+    public int getSepLocFmNoSnodes() {
+        return sepLocFmNoSnodes;
+    }
+
+    public boolean isSepGreedyDisabled() {
+        return sepGreedyDisabled;
+    }
+
+    public int getSepFmUnsuccSteps() {
+        return sepFmUnsuccSteps;
+    }
+
+    public int getSepLocFmUnsuccSteps() {
+        return sepLocFmUnsuccSteps;
+    }
+
+    public int getSepNumFmReps() {
+        return sepNumFmReps;
+    }
+
+    public int getSepNumLocFmReps() {
+        return sepNumLocFmReps;
+    }
+
+    public int getSepNumVertStop() {
+        return sepNumVertStop;
+    }
+
+    public boolean isSepFullBoundaryIp() {
+        return sepFullBoundaryIp;
+    }
+
+    public boolean isFasterNs() {
+        return fasterNs;
+    }
+
+    public EdgeRating getSepEdgeRatingDuringIp() {
+        return sepEdgeRatingDuringIp;
+    }
+
+    public int getClusterUpperbound() {
+        return clusterUpperbound;
+    }
+
+    public List<Integer> getTargetWeights() {
+        return targetWeights;
+    }
+
+    public boolean isInitialBipartitioning() {
+        return initialBipartitioning;
+    }
+
+    public int getGrowTarget() {
+        return growTarget;
+    }
+
+    public OptimizationMode getIlpMode() {
+        return ilpMode;
+    }
+
+    public int getIlpMinGain() {
+        return ilpMinGain;
+    }
+
+    public int getIlpBfsDepth() {
+        return ilpBfsDepth;
+    }
+
+    public int getIlpBfsMinGain() {
+        return ilpBfsMinGain;
+    }
+
+    public OverlapPresets getIlpOverlapPresets() {
+        return ilpOverlapPresets;
+    }
+
+    public int getIlpLimitNonzeroes() {
+        return ilpLimitNonzeroes;
+    }
+
+    public int getIlpOverlapRuns() {
+        return ilpOverlapRuns;
+    }
+
+    public int getIlpTimeout() {
+        return ilpTimeout;
+    }
+
+    public int getCommunicationNeighborhoodDist() {
+        return communicationNeighborhoodDist;
+    }
+
+    public LsNeighborhoodType getLsNeighborhood() {
+        return lsNeighborhood;
+    }
+
+    public ConstructionAlgorithm getConstructionAlgorithm() {
+        return constructionAlgorithm;
+    }
+
+    public DistanceConstructionAlgorithm getDistanceConstructionAlgorithm() {
+        return distanceConstructionAlgorithm;
+    }
+
+    public List<Integer> getGroupSizes() {
+        return groupSizes;
+    }
+
+    public List<Integer> getDistances() {
+        return distances;
+    }
+
+    public int getSearchSpaceS() {
+        return searchSpaceS;
+    }
+
+    public int getMaxRecursionLevelsConstruction() {
+        return maxRecursionLevelsConstruction;
+    }
+
+    public boolean isEnableMapping() {
+        return enableMapping;
+    }
+
+    public int getDissectionRecLimit() {
+        return dissectionRecLimit;
+    }
+
+    public boolean isDisableReductions() {
+        return disableReductions;
+    }
+
+    public List<NestedDissectionReductionType> getReductionOrder() {
+        return reductionOrder;
+    }
+
+    public double getConvergenceFactor() {
+        return convergenceFactor;
+    }
+
+    public int getMaxSimplicialDegree() {
+        return maxSimplicialDegree;
+    }
+
+    public boolean isEnableOmp() {
+        return enableOmp;
+    }
+
+    public PreConfigMapping getPreconfigurationMapping() {
+        return preconfigurationMapping;
+    }
 
 }
