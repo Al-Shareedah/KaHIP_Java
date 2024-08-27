@@ -1,4 +1,7 @@
 package org.alshar.lib.data_structure;
+
+import org.alshar.lib.partition.uncoarsening.refinement.quotient_graph_refinement.PartialBoundary;
+
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Stack;
@@ -57,6 +60,40 @@ public class GraphHierarchy {
         return finer;
     }
 
+    public GraphAccess popFinerAndProjectNs(PartialBoundary separator) {
+        GraphAccess finer = popCoarsest();
+
+        List<Integer> coarseMapping = mappingsStack.pop();  // CoarseMapping
+
+        if (finer == coarsestGraph) {
+            currentCoarserGraph = finer;
+            finer = popCoarsest();
+            finer.setPartitionCount(currentCoarserGraph.getPartitionCount());
+
+            coarseMapping = mappingsStack.pop();  // CoarseMapping
+        }
+
+        assert graphHierarchyStack.size() == mappingsStack.size();
+
+        separator.clear();
+
+        // Perform projection with node separation
+        for (int n = 0; n < finer.numberOfNodes(); n++) {
+            int coarserNode = coarseMapping.get(n);
+            int coarserPartitionID = currentCoarserGraph.getPartitionIndex(coarserNode);
+            finer.setPartitionIndex(n, coarserPartitionID);
+            if (coarserPartitionID == 2) {
+                separator.insert(n);
+            }
+        }
+
+        currentCoarseMapping = coarseMapping;
+        finer.setPartitionCount(currentCoarserGraph.getPartitionCount());
+        currentCoarserGraph = finer;
+
+        return finer;
+    }
+
     public List<Integer> getMappingOfCurrentFiner() {  // CoarseMapping
         return currentCoarseMapping;
     }
@@ -96,6 +133,3 @@ public class GraphHierarchy {
         }
     }
 }
-
-
-

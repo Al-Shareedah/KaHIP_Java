@@ -12,8 +12,8 @@ public class QualityMetrics {
     public QualityMetrics() {
     }
 
-    public long edgeCut(GraphAccess G) {
-        long edgeCut = 0;
+    public int edgeCut(GraphAccess G) {
+        int edgeCut = 0;
         for (int n = 0; n < G.numberOfNodes(); n++) {
             int partitionIDSource = G.getPartitionIndex(n);
             for (int e = G.getFirstEdge(n); e < G.getFirstInvalidEdge(n); e++) {
@@ -28,8 +28,8 @@ public class QualityMetrics {
         return edgeCut / 2;
     }
 
-    public long edgeCut(GraphAccess G, int[] partitionMap) {
-        long edgeCut = 0;
+    public int edgeCut(GraphAccess G, int[] partitionMap) {
+        int edgeCut = 0;
         for (int n = 0; n < G.numberOfNodes(); n++) {
             int partitionIDSource = partitionMap[n];
             for (int e = G.getFirstEdge(n); e < G.getFirstInvalidEdge(n); e++) {
@@ -44,8 +44,8 @@ public class QualityMetrics {
         return edgeCut / 2;
     }
 
-    public long edgeCut(GraphAccess G, int lhs, int rhs) {
-        long edgeCut = 0;
+    public int edgeCut(GraphAccess G, int lhs, int rhs) {
+        int edgeCut = 0;
         for (int n = 0; n < G.numberOfNodes(); n++) {
             int partitionIDSource = G.getPartitionIndex(n);
             if (partitionIDSource != lhs) continue;
@@ -61,9 +61,9 @@ public class QualityMetrics {
         return edgeCut;
     }
 
-    public long edgeCutConnected(GraphAccess G, int[] partitionMap) {
-        long edgeCut = 0;
-        long sumEW = 0;
+    public int edgeCutConnected(GraphAccess G, int[] partitionMap) {
+        int edgeCut = 0;
+        int sumEW = 0;
         for (int n = 0; n < G.numberOfNodes(); n++) {
             int partitionIDSource = partitionMap[n];
             for (int e = G.getFirstEdge(n); e < G.getFirstInvalidEdge(n); e++) {
@@ -87,12 +87,12 @@ public class QualityMetrics {
             }
         }
 
-        Map<Integer, Integer> sizeRight = new HashMap<>();
+        Set<Integer> sizeRight = new HashSet<>();
         for (int node = 0; node < G.numberOfNodes(); node++) {
-            sizeRight.put(uf.find(node), 1);
+            sizeRight.add(uf.find(node));
         }
 
-        System.out.println("number of connected components: " + sizeRight.size());
+        System.out.println("Number of connected components: " + sizeRight.size());
         if (sizeRight.size() == G.getPartitionCount()) {
             return edgeCut / 2;
         } else {
@@ -100,14 +100,15 @@ public class QualityMetrics {
         }
     }
 
-    public long maxCommunicationVolume(GraphAccess G, int[] partitionMap) {
-        long[] blockVolume = new long[G.getPartitionCount()];
+    public int maxCommunicationVolume(GraphAccess G, int[] partitionMap) {
+        int[] blockVolume = new int[G.getPartitionCount()];
         for (int node = 0; node < G.numberOfNodes(); node++) {
             int block = partitionMap[node];
             boolean[] blockIncident = new boolean[G.getPartitionCount()];
             blockIncident[block] = true;
 
             int numIncidentBlocks = 0;
+
             for (int e = G.getFirstEdge(node); e < G.getFirstInvalidEdge(node); e++) {
                 int target = G.getEdgeTarget(e);
                 int targetBlock = partitionMap[target];
@@ -122,14 +123,36 @@ public class QualityMetrics {
         return Arrays.stream(blockVolume).max().orElse(0);
     }
 
-    public long maxCommunicationVolume(GraphAccess G) {
-        long[] blockVolume = new long[G.getPartitionCount()];
+    public int minCommunicationVolume(GraphAccess G) {
+        int[] blockVolume = new int[G.getPartitionCount()];
         for (int node = 0; node < G.numberOfNodes(); node++) {
             int block = G.getPartitionIndex(node);
             boolean[] blockIncident = new boolean[G.getPartitionCount()];
             blockIncident[block] = true;
-
             int numIncidentBlocks = 0;
+
+            for (int e = G.getFirstEdge(node); e < G.getFirstInvalidEdge(node); e++) {
+                int target = G.getEdgeTarget(e);
+                int targetBlock = G.getPartitionIndex(target);
+                if (!blockIncident[targetBlock]) {
+                    blockIncident[targetBlock] = true;
+                    numIncidentBlocks++;
+                }
+            }
+            blockVolume[block] += numIncidentBlocks;
+        }
+
+        return Arrays.stream(blockVolume).min().orElse(0);
+    }
+
+    public int maxCommunicationVolume(GraphAccess G) {
+        int[] blockVolume = new int[G.getPartitionCount()];
+        for (int node = 0; node < G.numberOfNodes(); node++) {
+            int block = G.getPartitionIndex(node);
+            boolean[] blockIncident = new boolean[G.getPartitionCount()];
+            blockIncident[block] = true;
+            int numIncidentBlocks = 0;
+
             for (int e = G.getFirstEdge(node); e < G.getFirstInvalidEdge(node); e++) {
                 int target = G.getEdgeTarget(e);
                 int targetBlock = G.getPartitionIndex(target);
@@ -144,25 +167,87 @@ public class QualityMetrics {
         return Arrays.stream(blockVolume).max().orElse(0);
     }
 
+    public int totalCommunicationVolume(GraphAccess G) {
+        int[] blockVolume = new int[G.getPartitionCount()];
+        for (int node = 0; node < G.numberOfNodes(); node++) {
+            int block = G.getPartitionIndex(node);
+            boolean[] blockIncident = new boolean[G.getPartitionCount()];
+            blockIncident[block] = true;
+            int numIncidentBlocks = 0;
+
+            for (int e = G.getFirstEdge(node); e < G.getFirstInvalidEdge(node); e++) {
+                int target = G.getEdgeTarget(e);
+                int targetBlock = G.getPartitionIndex(target);
+                if (!blockIncident[targetBlock]) {
+                    blockIncident[targetBlock] = true;
+                    numIncidentBlocks++;
+                }
+            }
+            blockVolume[block] += numIncidentBlocks;
+        }
+
+        return Arrays.stream(blockVolume).sum();
+    }
+
     public int boundaryNodes(GraphAccess G) {
-        int boundaryNodesCount = 0;
+        int noOfBoundaryNodes = 0;
         for (int n = 0; n < G.numberOfNodes(); n++) {
             int partitionIDSource = G.getPartitionIndex(n);
+
             for (int e = G.getFirstEdge(n); e < G.getFirstInvalidEdge(n); e++) {
                 int targetNode = G.getEdgeTarget(e);
                 int partitionIDTarget = G.getPartitionIndex(targetNode);
 
                 if (partitionIDSource != partitionIDTarget) {
-                    boundaryNodesCount++;
+                    noOfBoundaryNodes++;
                     break;
                 }
             }
         }
-        return boundaryNodesCount;
+        return noOfBoundaryNodes;
+    }
+
+    public double balanceSeparator(GraphAccess G) {
+        int[] partWeights = new int[G.getPartitionCount()];
+
+        double overallWeight = 0;
+
+        for (int n = 0; n < G.numberOfNodes(); n++) {
+            int curPartition = G.getPartitionIndex(n);
+            partWeights[curPartition] += G.getNodeWeight(n);
+            overallWeight += G.getNodeWeight(n);
+        }
+
+        double balancePartWeight = Math.ceil(overallWeight / (G.getPartitionCount() - 1));
+        double curMax = -1;
+
+        int separatorBlock = G.getSeparatorBlock();
+        for (int p = 0; p < G.getPartitionCount(); p++) {
+            if (p == separatorBlock) continue;
+            double cur = partWeights[p];
+            if (cur > curMax) {
+                curMax = cur;
+            }
+        }
+
+        return curMax / balancePartWeight;
+    }
+
+    public int separatorWeight(GraphAccess G) {
+        int separatorSize = 0;
+        int separatorID = G.getSeparatorBlock();
+        for (int node = 0; node < G.numberOfNodes(); node++) {
+            if (G.getPartitionIndex(node) == separatorID) {
+                separatorSize += G.getNodeWeight(node);
+            }
+        }
+
+        return separatorSize;
     }
 
     public double balance(GraphAccess G) {
         int[] partWeights = new int[G.getPartitionCount()];
+
         double overallWeight = 0;
 
         for (int n = 0; n < G.numberOfNodes(); n++) {
@@ -186,6 +271,7 @@ public class QualityMetrics {
 
     public double edgeBalance(GraphAccess G, List<Integer> edgePartition) {
         int[] partWeights = new int[G.getPartitionCount()];
+
         double overallWeight = 0;
 
         for (int e = 0; e < G.numberOfEdges(); e++) {
@@ -209,6 +295,7 @@ public class QualityMetrics {
 
     public double balanceEdges(GraphAccess G) {
         int[] partWeights = new int[G.getPartitionCount()];
+
         double overallWeight = 0;
 
         for (int n = 0; n < G.numberOfNodes(); n++) {
@@ -230,7 +317,7 @@ public class QualityMetrics {
         return curMax / balancePartWeight;
     }
 
-    public long objective(PartitionConfig config, GraphAccess G, int[] partitionMap) {
+    public int objective(PartitionConfig config, GraphAccess G, int[] partitionMap) {
         if (config.isMhOptimizeCommunicationVolume()) {
             return maxCommunicationVolume(G, partitionMap);
         } else if (config.isMhPenaltyForUnconnected()) {
@@ -240,22 +327,23 @@ public class QualityMetrics {
         }
     }
 
-    public long totalQap(GraphAccess C, Matrix D, List<Integer> rankAssign) {
-        long totalVolume = 0;
+    public int totalQap(GraphAccess C, Matrix D, List<Integer> rankAssign) {
+        int totalVolume = 0;
         for (int node = 0; node < C.numberOfNodes(); node++) {
             for (int e = C.getFirstEdge(node); e < C.getFirstInvalidEdge(node); e++) {
                 int target = C.getEdgeTarget(e);
                 int commVol = C.getEdgeWeight(e);
                 int permRankNode = rankAssign.get(node);
                 int permRankTarget = rankAssign.get(target);
-                totalVolume += commVol * D.getXY(permRankNode, permRankTarget);
+                int curVol = commVol * D.getXY(permRankNode, permRankTarget);
+                totalVolume += curVol;
             }
         }
         return totalVolume;
     }
 
-    public long totalQap(Matrix C, Matrix D, List<Integer> rankAssign) {
-        long totalVolume = 0;
+    public int totalQap(Matrix C, Matrix D, List<Integer> rankAssign) {
+        int totalVolume = 0;
         for (int i = 0; i < C.getXDim(); i++) {
             for (int j = 0; j < C.getYDim(); j++) {
                 int permRankNode = rankAssign.get(i);

@@ -17,6 +17,12 @@ public class GraphAccess {
         this.separatorBlockID = 2;
         this.secondPartitionIndex = new ArrayList<>();
     }
+    public BasicGraph getGraphRef() {
+        return graphRef;
+    }
+    public void setGraphRef(BasicGraph graphRef) {
+        this.graphRef = graphRef;
+    }
 
     public void startConstruction(int nodes, int edges) {
         graphRef.startConstruction(nodes, edges);
@@ -114,11 +120,11 @@ public class GraphAccess {
     }
 
 
-    public float getEdgeRating(int edge) {
+    public double getEdgeRating(int edge) {
         return graphRef.coarseningEdgeProps.get(edge).rating;
     }
 
-    public void setEdgeRating(int edge, float rating) {
+    public void setEdgeRating(int edge, double rating) {
         graphRef.coarseningEdgeProps.get(edge).rating = rating;
     }
 

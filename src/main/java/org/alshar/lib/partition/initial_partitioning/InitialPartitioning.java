@@ -4,6 +4,8 @@ import java.util.Random;
 import org.alshar.lib.data_structure.GraphAccess;
 import org.alshar.lib.data_structure.GraphHierarchy;
 import org.alshar.lib.partition.PartitionConfig;
+import org.alshar.lib.partition.initial_partitioning.initial_refinement.InitialRefinement;
+import org.alshar.lib.tools.GraphPartitionAssertions;
 import org.alshar.lib.tools.QualityMetrics;
 import org.alshar.lib.tools.Timer;
 

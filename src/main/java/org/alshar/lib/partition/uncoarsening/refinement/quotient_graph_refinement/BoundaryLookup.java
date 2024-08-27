@@ -23,6 +23,18 @@ public class BoundaryLookup {
             this.rhs = 0;
         }
 
+        public int getK() {
+            return k;
+        }
+
+        public int getLhs() {
+            return lhs;
+        }
+
+        public int getRhs() {
+            return rhs;
+        }
+
         @Override
         public boolean equals(Object o) {
             if (this == o) return true;

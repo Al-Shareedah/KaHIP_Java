@@ -6,6 +6,8 @@ import org.alshar.lib.enums.BipartitionAlgorithm;
 import org.alshar.lib.enums.RefinementSchedulingAlgorithm;
 import org.alshar.lib.enums.RefinementType;
 import org.alshar.lib.partition.PartitionConfig;
+import org.alshar.lib.partition.uncoarsening.refinement.Refinement;
+import org.alshar.lib.partition.uncoarsening.refinement.quotient_graph_refinement.QuotientGraphRefinement;
 import org.alshar.lib.tools.QualityMetrics;
 import org.alshar.lib.tools.Timer;
 import org.alshar.lib.tools.RandomFunctions;

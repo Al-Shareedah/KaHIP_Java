@@ -30,7 +30,7 @@ public class CompleteBoundary {
     private BoundaryLookup.BoundaryPair lastPair;
     private int lastKey;
     private BoundaryLookup.HashBoundaryPair hbp;
-
+    private GraphAccess Q;
     public CompleteBoundary(GraphAccess G) {
         this.graphRef = G;
         this.pbLhsLazy = null;
@@ -39,7 +39,8 @@ public class CompleteBoundary {
         this.lastKey = -1;
         this.blockInfos = new ArrayList<>(Collections.nCopies((int) G.getPartitionCount(), new BlockInformation()));
         this.singletons = new ArrayList<>();
-        this.mPairs = new BoundaryLookup.BlockPairs();  // Use the custom BlockPairs class which extends HashMap
+        this.mPairs = new BoundaryLookup.BlockPairs();
+        this.Q = new GraphAccess();
     }
     public void postMovedBoundaryNodeUpdates(int node, BoundaryLookup.BoundaryPair pair, boolean updateEdgeCuts, boolean updateAllBoundaries) {
         GraphAccess G = graphRef;
@@ -185,7 +186,7 @@ public class CompleteBoundary {
         }
     }
 
-    public void buildFromCoarser(CompleteBoundary coarserBoundary, int coarserNoNodes, CoarseMapping cmapping) {
+    public void buildFromCoarser(CompleteBoundary coarserBoundary, int coarserNoNodes, List<Integer> cmapping) {
         GraphAccess G = graphRef;
 
         List<Boolean> coarseIsBorderNode = new ArrayList<>(Collections.nCopies(coarserNoNodes, false));
@@ -291,7 +292,7 @@ public class CompleteBoundary {
         return blockInfos.get(partition).getBlockWeight();
     }
 
-    public long getBlockNoNodes(int partition) {
+    public int getBlockNoNodes(int partition) {
         return blockInfos.get(partition).getBlockNoNodes();
     }
 
@@ -393,7 +394,7 @@ public class CompleteBoundary {
         BasicGraph graphref = new BasicGraph();
 
         if (QBar.getGraphRef() != null) {
-            QBar.getGraphRef().delete();
+            QBar.getGraphRef().clear();  // or appropriate method to clean up the graph
         }
         QBar.setGraphRef(graphref);
 
@@ -411,7 +412,7 @@ public class CompleteBoundary {
 
         for (int p = 0; p < buildingTool.size(); p++) {
             int node = QBar.newNode();
-            QBar.setNodeWeight(node, blockInfos.get(p).blockWeight);
+            QBar.setNodeWeight(node, blockInfos.get(p).getBlockWeight());
 
             for (Map.Entry<Integer, Integer> qedge : buildingTool.get(p)) {
                 int e = QBar.newEdge(node, qedge.getKey());
@@ -423,13 +424,13 @@ public class CompleteBoundary {
     }
 
     public void getNeighbors(int block, List<Integer> neighbors) {
-        if (QBar.getGraphRef() == null) {
-            getUnderlyingQuotientGraph(QBar);
+        if (Q.getGraphRef() == null) {
+            getUnderlyingQuotientGraph(Q);
         }
 
-        for (int e = QBar.getFirstEdge(block), end = QBar.getFirstInvalidEdge(block); e < end; e++) {
-            assert QBar.getEdgeTarget(e) != block;
-            neighbors.add(QBar.getEdgeTarget(e));
+        for (int e = Q.getFirstEdge(block), end = Q.getFirstInvalidEdge(block); e < end; e++) {
+            assert Q.getEdgeTarget(e) != block;
+            neighbors.add(Q.getEdgeTarget(e));
         }
     }
 
@@ -443,42 +444,42 @@ public class CompleteBoundary {
         Map<Integer, Boolean> alreadyContained = new HashMap<>();
         for (int neighbor : lhsNeighbors) {
             PartialBoundary partialBoundaryLhs = getDirectedBoundary(lhs, lhs, neighbor);
-            for (int curBndNode : partialBoundaryLhs.getBoundaryNodes()) {
+            partialBoundaryLhs.forAllBoundaryNodes(curBndNode -> {
                 assert G.getPartitionIndex(curBndNode) == lhs;
                 if (!alreadyContained.containsKey(curBndNode)) {
                     startNodes.add(curBndNode);
                     alreadyContained.put(curBndNode, true);
                 }
-            }
+            });
 
             PartialBoundary partialBoundaryNeighbor = getDirectedBoundary(neighbor, lhs, neighbor);
-            for (int curBndNode : partialBoundaryNeighbor.getBoundaryNodes()) {
+            partialBoundaryNeighbor.forAllBoundaryNodes(curBndNode -> {
                 assert G.getPartitionIndex(curBndNode) == neighbor;
                 if (!alreadyContained.containsKey(curBndNode)) {
                     startNodes.add(curBndNode);
                     alreadyContained.put(curBndNode, true);
                 }
-            }
+            });
         }
 
         for (int neighbor : rhsNeighbors) {
             PartialBoundary partialBoundaryRhs = getDirectedBoundary(rhs, rhs, neighbor);
-            for (int curBndNode : partialBoundaryRhs.getBoundaryNodes()) {
+            partialBoundaryRhs.forAllBoundaryNodes(curBndNode -> {
                 assert G.getPartitionIndex(curBndNode) == rhs;
                 if (!alreadyContained.containsKey(curBndNode)) {
                     startNodes.add(curBndNode);
                     alreadyContained.put(curBndNode, true);
                 }
-            }
+            });
 
             PartialBoundary partialBoundaryNeighbor = getDirectedBoundary(neighbor, rhs, neighbor);
-            for (int curBndNode : partialBoundaryNeighbor.getBoundaryNodes()) {
+            partialBoundaryNeighbor.forAllBoundaryNodes(curBndNode -> {
                 assert G.getPartitionIndex(curBndNode) == neighbor;
                 if (!alreadyContained.containsKey(curBndNode)) {
                     startNodes.add(curBndNode);
                     alreadyContained.put(curBndNode, true);
                 }
-            }
+            });
         }
     }
 
@@ -493,30 +494,31 @@ public class CompleteBoundary {
             int rhs = retValue.rhs;
 
             PartialBoundary partialBoundaryLhs = getDirectedBoundary(lhs, lhs, rhs);
-            for (int curBndNode : partialBoundaryLhs.getBoundaryNodes()) {
+            partialBoundaryLhs.forAllBoundaryNodes(curBndNode -> {
                 assert G.getPartitionIndex(curBndNode) == lhs;
                 if (!alreadyContained.containsKey(curBndNode)) {
                     startNodes.add(curBndNode);
                     alreadyContained.put(curBndNode, true);
                 }
-            }
+            });
 
             PartialBoundary partialBoundaryRhs = getDirectedBoundary(rhs, lhs, rhs);
-            for (int curBndNode : partialBoundaryRhs.getBoundaryNodes()) {
+            partialBoundaryRhs.forAllBoundaryNodes(curBndNode -> {
                 assert G.getPartitionIndex(curBndNode) == rhs;
                 if (!alreadyContained.containsKey(curBndNode)) {
                     startNodes.add(curBndNode);
                     alreadyContained.put(curBndNode, true);
                 }
-            }
+            });
         }
     }
+
 
     public void fastComputeQuotientGraph(GraphAccess QBar, int noOfBlocks) {
         BasicGraph graphref = new BasicGraph();
 
         if (QBar.getGraphRef() != null) {
-            QBar.getGraphRef().delete();
+            QBar.getGraphRef().clear();
         }
         QBar.setGraphRef(graphref);
 
@@ -605,11 +607,11 @@ public class CompleteBoundary {
                     }
                 }
 
-                assert blockInfos.get(lhs).blockWeight == lhsPartWeight;
-                assert blockInfos.get(rhs).blockWeight == rhsPartWeight;
-                assert blockInfos.get(lhs).blockNoNodes == lhsNoNodes;
-                assert blockInfos.get(rhs).blockNoNodes == rhsNoNodes;
-                assert Mpairs.get(bp).edgeCut == edgeCut / 2;
+                assert blockInfos.get(lhs).getBlockWeight() == lhsPartWeight;
+                assert blockInfos.get(rhs).getBlockWeight() == rhsPartWeight;
+                assert blockInfos.get(lhs).getBlockNoNodes() == lhsNoNodes;
+                assert blockInfos.get(rhs).getBlockNoNodes() == rhsNoNodes;
+                assert mPairs.get(bp).edgeCut == edgeCut / 2;
             }
         }
 

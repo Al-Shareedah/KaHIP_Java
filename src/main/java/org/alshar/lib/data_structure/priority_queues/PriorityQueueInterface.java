@@ -18,5 +18,6 @@ public interface PriorityQueueInterface {
     int getKey(int element);
     void deleteNode(int node);
     boolean contains(int node);
+    void clear();
 }
 

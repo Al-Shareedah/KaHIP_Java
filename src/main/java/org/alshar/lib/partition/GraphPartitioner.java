@@ -1,8 +1,18 @@
 package org.alshar.lib.partition;
 import org.alshar.lib.data_structure.GraphAccess;
+import org.alshar.lib.data_structure.GraphHierarchy;
 import org.alshar.lib.enums.EdgeRating;
+import org.alshar.lib.enums.RefinementSchedulingAlgorithm;
+import org.alshar.lib.enums.RefinementType;
 import org.alshar.lib.enums.StopRule;
+import org.alshar.lib.partition.coarsening.Coarsening;
 import org.alshar.lib.partition.initial_partitioning.InitialPartitioning;
+import org.alshar.lib.partition.uncoarsening.Uncoarsening;
+import org.alshar.lib.partition.uncoarsening.refinement.MixedRefinement;
+import org.alshar.lib.partition.uncoarsening.refinement.Refinement;
+import org.alshar.lib.partition.uncoarsening.refinement.quotient_graph_refinement.CompleteBoundary;
+import org.alshar.lib.partition.w_cycles.WCyclePartitioner;
+import org.alshar.lib.tools.GraphExtractor;
 import org.alshar.lib.tools.QualityMetrics;
 import org.alshar.lib.tools.RandomFunctions;
 
@@ -103,7 +113,7 @@ public class GraphPartitioner {
         bipartConfig.setUpperBoundPartition((int) Math.ceil((1 + epsilon) * config.getWorkLoad() / bipartConfig.getK()));
         bipartConfig.setCornerRefinementEnabled(false);
         bipartConfig.setQuotientGraphRefinementDisabled(false);
-        bipartConfig.setRefinementSchedulingAlgorithm(RefinementSchedulingAlgorithm.ACTIVE_BLOCKS);
+        bipartConfig.setRefinementSchedulingAlgorithm(RefinementSchedulingAlgorithm.REFINEMENT_SCHEDULING_ACTIVE_BLOCKS);
         bipartConfig.setKwayAdaptiveLimitsBeta(Math.log(G.numberOfNodes()));
 
         int newUbLhs = (int) Math.floor((lb + ub) / 2.0);
@@ -113,10 +123,10 @@ public class GraphPartitioner {
 
         if (config.getK() % 2 != 0) {
             bipartConfig.getTargetWeights().clear();
-            bipartConfig.getTargetWeights().add((1 + epsilon) * numBlocksLhs / (double) (numBlocksLhs + numBlocksRhs) * config.getWorkLoad());
-            bipartConfig.getTargetWeights().add((1 + epsilon) * numBlocksRhs / (double) (numBlocksLhs + numBlocksRhs) * config.getWorkLoad());
+            bipartConfig.getTargetWeights().add((int) Math.round((1 + epsilon) * numBlocksLhs / (double) (numBlocksLhs + numBlocksRhs) * config.getWorkLoad()));
+            bipartConfig.getTargetWeights().add((int) Math.round((1 + epsilon) * numBlocksRhs / (double) (numBlocksLhs + numBlocksRhs) * config.getWorkLoad()));
             bipartConfig.setInitialBipartitioning(true);
-            bipartConfig.setRefinementType(RefinementType.FM); // flows not supported for odd block weights
+            bipartConfig.setRefinementType(RefinementType.REFINEMENT_TYPE_FM); // flows not supported for odd block weights
         } else {
             bipartConfig.getTargetWeights().clear();
             bipartConfig.getTargetWeights().add(bipartConfig.getUpperBoundPartition());

@@ -14,6 +14,7 @@ public class BasicGraph {
     private int node = 0;
     private int e = 0;
 
+
     public int numberOfEdges() {
         return edges.size();
     }
@@ -105,6 +106,17 @@ public class BasicGraph {
         while (list.size() > size) {
             list.remove(list.size() - 1);
         }
+    }
+    public void clear() {
+        nodes.clear();
+        edges.clear();
+        refinementNodeProps.clear();
+        coarseningEdgeProps.clear();
+        contractionOffset.clear();
+        buildingGraph = false;
+        lastSource = -1;
+        node = 0;
+        e = 0;
     }
 
 }
