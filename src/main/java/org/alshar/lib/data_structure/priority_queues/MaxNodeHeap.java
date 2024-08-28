@@ -49,7 +49,7 @@ public class MaxNodeHeap implements PriorityQueueInterface {
 
     private final List<PQElement> elements = new ArrayList<>();
     private final Map<Integer, Integer> elementIndex = new HashMap<>();
-    private final List<Map.Entry<Integer, Integer>> heap = new ArrayList<>();
+    public final List<Map.Entry<Integer, Integer>> heap = new ArrayList<>();
 
     @Override
     public int size() {
@@ -213,7 +213,6 @@ public class MaxNodeHeap implements PriorityQueueInterface {
         int curKey = heap.get(pos).getKey();
         int lhsChild = 2 * pos + 1;
         int rhsChild = 2 * pos + 2;
-
         if (rhsChild < heap.size()) {
             int lhsKey = heap.get(lhsChild).getKey();
             int rhsKey = heap.get(rhsChild).getKey();

@@ -104,11 +104,29 @@ public class TwoWayFM extends TwoWayRefinement {
                 break;
             }
 
+
             qSelect.selectQueue(lhsPartWeight, rhsPartWeight,
                     pair.lhs, pair.rhs,
                     from, to,
                     lhsQueue, rhsQueue,
                     fromQueue, toQueue);
+
+
+            // Check for negative keys in the heap of fromQueue[0] and toQueue[0]
+            PriorityQueueInterface[] queuesToCheck = {fromQueue[0], toQueue[0]};
+
+            for (PriorityQueueInterface queue : queuesToCheck) {
+                if (queue instanceof MaxNodeHeap) {
+                    MaxNodeHeap heapQueue = (MaxNodeHeap) queue;
+                    for (Map.Entry<Integer, Integer> heapEntry : heapQueue.heap) {
+                        if (heapEntry.getValue() < 0) {
+                            System.out.println("Negative key found in heap:");
+                            System.out.println("Key: " + heapEntry.getKey() + ", Value (index): " + heapEntry.getValue());
+                        }
+                    }
+                }
+            }
+
 
             if (fromQueue[0] != null && !fromQueue[0].isEmpty()) {
                 int gain = fromQueue[0].maxValue();
@@ -145,8 +163,14 @@ public class TwoWayFM extends TwoWayRefinement {
                     minCutIndex = numberOfSwaps;
                 }
 
-                transpositions.add(node);
-                movedIdx.get(node).index = VertexMovedHashtable.MOVED.index;
+                // Safely check and update the moved index
+                VertexMovedHashtable.MovedIndex movedIndex = movedIdx.get(node);
+                if (movedIndex == null) {
+                    // Initialize the movedIndex if it's not already in the map
+                    movedIndex = new VertexMovedHashtable.MovedIndex();
+                    movedIdx.put(node, movedIndex);
+                }
+                movedIndex.index = VertexMovedHashtable.MOVED.index;
             } else {
                 break;
             }
@@ -263,7 +287,8 @@ public class TwoWayFM extends TwoWayRefinement {
             PriorityQueueInterface queueToUpdate = targetPartition == from ? fromQueue : toQueue;
 
             int gain = extDegree[0] - intDegree[0];
-            if (queueToUpdate.contains(target)) {
+            boolean found = queueToUpdate.contains(target);
+            if (found) {
                 if (extDegree[0] == 0) {
                     queueToUpdate.deleteNode(target);
                     boundary.deleteNode(target, targetPartition, pair);
@@ -271,8 +296,12 @@ public class TwoWayFM extends TwoWayRefinement {
                     queueToUpdate.changeKey(target, gain);
                 }
             } else {
-                if (extDegree[0] > 0 && movedIdx.get(target).index == VertexMovedHashtable.NOT_MOVED) {
-                    queueToUpdate.insert(target, gain);
+                if (extDegree[0] > 0) {
+                    VertexMovedHashtable.MovedIndex movedIndex = movedIdx.get(target);
+                    if (movedIndex == null || movedIndex.index == VertexMovedHashtable.NOT_MOVED) {
+                        queueToUpdate.insert(target, gain);
+                        movedIdx.put(target, VertexMovedHashtable.MOVED);
+                    }
                     boundary.insert(target, targetPartition, pair);
                 } else {
                     boundary.deleteNode(target, targetPartition, pair);
