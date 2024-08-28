@@ -1,5 +1,7 @@
 package org.alshar;
 import org.alshar.app.BalanceConfiguration;
+import org.alshar.lib.data_structure.matrix.NormalMatrix;
+import org.alshar.lib.data_structure.matrix.OnlineDistanceMatrix;
 import org.alshar.lib.io.GraphIO;
 import org.alshar.app.ParseParameters;
 import org.alshar.lib.data_structure.GraphAccess;
@@ -11,10 +13,11 @@ import org.alshar.lib.partition.uncoarsening.refinement.quotient_graph_refinemen
 import org.alshar.lib.tools.QualityMetrics;
 import org.alshar.lib.tools.RandomFunctions;
 import org.alshar.lib.tools.Timer;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
 
-import java.io.FileOutputStream;
-import java.io.PrintStream;
-import java.util.Arrays;
+import static org.alshar.lib.enums.DistanceConstructionAlgorithm.DIST_CONST_HIERARCHY_ONLINE;
 
 // Press Shift twice to open the Search Everywhere dialog and type `show whitespaces`,
 // then press Enter. You can now see whitespace characters in your code.
@@ -116,7 +119,11 @@ public class Main {
 
             // Check if k is a power of 2
             boolean powerOfTwo = (partitionConfig.getK() & (partitionConfig.getK() - 1)) == 0;
-            int[] permRank = new int[partitionConfig.getK()];
+            int[] permRankArray = new int[partitionConfig.getK()];
+            List<Integer> permRank = new ArrayList<>();
+            for (int i : permRankArray) {
+                permRank.add(i);
+            }
 
             GraphAccess C = new GraphAccess();
             CompleteBoundary boundary = new CompleteBoundary(G);
@@ -130,7 +137,7 @@ public class Main {
             if (!powerOfTwo) {
                 t.restart();
                 MappingAlgorithms ma = new MappingAlgorithms();
-                if (partitionConfig.getDistanceConstructionAlgorithm() != PartitionConfig.DIST_CONST_HIERARCHY_ONLINE) {
+                if (partitionConfig.getDistanceConstructionAlgorithm() != DIST_CONST_HIERARCHY_ONLINE) {
                     NormalMatrix D = new NormalMatrix(partitionConfig.getK(), partitionConfig.getK());
                     ma.constructAMapping(partitionConfig, C, D, permRank);
                     System.out.println("Time spent for mapping: " + t.elapsed() + " ms");
@@ -145,8 +152,8 @@ public class Main {
             } else {
                 System.out.println("Number of processors is a power of two, so no mapping algorithm is performed (identity is best)");
                 System.out.println("Time spent for mapping: 0 ms");
-                for (int i = 0; i < permRank.length; i++) {
-                    permRank[i] = i;
+                for (int i = 0; i < permRank.size(); i++) {
+                    permRank.set(i, i);
                 }
 
                 OnlineDistanceMatrix D = new OnlineDistanceMatrix(partitionConfig.getK(), partitionConfig.getK());
@@ -155,19 +162,44 @@ public class Main {
             }
 
             // Solution check
-            int[] tbsorted = permRank.clone();
-            Arrays.sort(tbsorted);
-            for (int i = 0; i < tbsorted.length; i++) {
-                if (tbsorted[i] != i) {
+            List<Integer> tbsorted = new ArrayList<>(permRank); // Clone the list
+            Collections.sort(tbsorted); // Sort the list
+            for (int i = 0; i < tbsorted.size(); i++) {
+                if (!tbsorted.get(i).equals(i)) {
                     System.out.println("Solution is NOT a permutation. Please report this.");
-                    System.out.println(tbsorted[i] + " " + i);
+                    System.out.println(tbsorted.get(i) + " " + i);
                     System.exit(0);
                 }
             }
 
             for (int node = 0; node < G.numberOfNodes(); node++) {
-                G.setPartitionIndex(node, permRank[G.getPartitionIndex(node)]);
+                G.setPartitionIndex(node, permRank.get(G.getPartitionIndex(node)));
             }
+
+            // ******************************* done partitioning *****************************************
+            // Output some information about the partition that we have computed
+            System.out.println("cut \t\t" + qm.edgeCut(G));
+            System.out.println("final objective \t" + qm.edgeCut(G));
+            System.out.println("bnd \t\t" + qm.boundaryNodes(G));
+            System.out.println("balance \t" + qm.balance(G));
+            System.out.println("max_comm_vol \t" + qm.maxCommunicationVolume(G));
+
+            if (partitionConfig.isEnableMapping()) {
+                System.out.println("quadratic assignment objective J(C,D,Pi') = " + qap);
+            }
+
+            // Write the partition to the disk
+            String filename;
+            if (partitionConfig.getFilenameOutput().isEmpty()) {
+                filename = "tmppartition" + partitionConfig.getK();
+            } else {
+                filename = partitionConfig.getFilenameOutput();
+            }
+
+            // Create an instance of GraphIO
+            GraphIO graphIO = new GraphIO();
+            graphIO.writePartition(G, filename);
+
         }
 
     }

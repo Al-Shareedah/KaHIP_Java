@@ -9,6 +9,8 @@ import org.alshar.lib.data_structure.CoarseMapping;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.concurrent.atomic.AtomicInteger;
+
 public class RandomMatching extends Matching {
 
     public RandomMatching() {
@@ -20,7 +22,7 @@ public class RandomMatching extends Matching {
                       GraphAccess G,
                       List<Integer> edgeMatching,
                       List<Integer> coarseMapping,
-                      int noOfCoarseVertices,
+                      AtomicInteger noOfCoarseVertices,
                       List<Integer> permutation) {
 
         int numberOfNodes = G.numberOfNodes();
@@ -34,12 +36,14 @@ public class RandomMatching extends Matching {
             coarseMapping.add(-1);
         }
 
-        noOfCoarseVertices = 0;
+        noOfCoarseVertices.set(0);  // Reset the AtomicInteger to 0
 
         if (partitionConfig.getMatchingType() != MatchingType.MATCHING_RANDOM_GPA) {
             RandomFunctions.permutateEntries(partitionConfig, permutation, true);
         } else {
-            Collections.shuffle(permutation);
+            for (int i = 0; i < numberOfNodes; i++) {
+                permutation.set(i, i);
+            }
         }
 
         if (partitionConfig.isGraphAlreadyPartitioned()) {
@@ -69,13 +73,13 @@ public class RandomMatching extends Matching {
                         }
                     }
 
-                    coarseMapping.set(matchingPartner, noOfCoarseVertices);
-                    coarseMapping.set(curNode, noOfCoarseVertices);
+                    coarseMapping.set(matchingPartner, noOfCoarseVertices.get());
+                    coarseMapping.set(curNode, noOfCoarseVertices.get());
 
                     edgeMatching.set(matchingPartner, curNode);
                     edgeMatching.set(curNode, matchingPartner);
 
-                    noOfCoarseVertices++;
+                    noOfCoarseVertices.incrementAndGet();  // Increment the AtomicInteger
                 }
             }
         } else {
@@ -95,17 +99,18 @@ public class RandomMatching extends Matching {
                         }
                     }
 
-                    coarseMapping.set(matchingPartner, noOfCoarseVertices);
-                    coarseMapping.set(curNode, noOfCoarseVertices);
+                    coarseMapping.set(matchingPartner, noOfCoarseVertices.get());
+                    coarseMapping.set(curNode, noOfCoarseVertices.get());
 
                     edgeMatching.set(matchingPartner, curNode);
                     edgeMatching.set(curNode, matchingPartner);
 
-                    noOfCoarseVertices++;
+                    noOfCoarseVertices.incrementAndGet();  // Increment the AtomicInteger
                 }
             }
         }
 
-        System.out.println("log> no of coarse nodes: " + noOfCoarseVertices);
+        System.out.println("log> no of coarse nodes: " + noOfCoarseVertices.get());
     }
+
 }

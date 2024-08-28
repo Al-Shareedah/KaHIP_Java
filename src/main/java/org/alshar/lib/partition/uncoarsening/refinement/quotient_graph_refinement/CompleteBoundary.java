@@ -7,12 +7,7 @@ import org.alshar.lib.data_structure.CoarseMapping;
 import org.alshar.lib.partition.uncoarsening.refinement.quotient_graph_refinement.BoundaryLookup.BoundaryPair;
 import org.alshar.lib.partition.uncoarsening.refinement.quotient_graph_refinement.BoundaryLookup.HashBoundaryPair;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Collections;
-import java.util.AbstractMap;
+import java.util.*;
 import java.util.concurrent.atomic.AtomicInteger;
 
 
@@ -29,7 +24,7 @@ public class CompleteBoundary {
     private int lazyRhs;
     private BoundaryLookup.BoundaryPair lastPair;
     private int lastKey;
-    private BoundaryLookup.HashBoundaryPair hbp;
+    private BoundaryLookup.HashBoundaryPair hbp = new HashBoundaryPair();;
     private GraphAccess Q;
     public CompleteBoundary(GraphAccess G) {
         this.graphRef = G;
@@ -37,10 +32,14 @@ public class CompleteBoundary {
         this.pbRhsLazy = null;
         this.lastPair = null;
         this.lastKey = -1;
-        this.blockInfos = new ArrayList<>(Collections.nCopies((int) G.getPartitionCount(), new BlockInformation()));
         this.singletons = new ArrayList<>();
         this.mPairs = new BoundaryLookup.BlockPairs();
         this.Q = new GraphAccess();
+        this.blockInfos = new ArrayList<>(G.getPartitionCount());
+        for (int i = 0; i < G.getPartitionCount(); i++) {
+            this.blockInfos.add(new BlockInformation());
+        }
+
     }
     public void postMovedBoundaryNodeUpdates(int node, BoundaryLookup.BoundaryPair pair, boolean updateEdgeCuts, boolean updateAllBoundaries) {
         GraphAccess G = graphRef;
@@ -154,11 +153,10 @@ public class CompleteBoundary {
         for (int n = 0; n < G.numberOfNodes(); n++) {
             int sourcePartition = G.getPartitionIndex(n);
 
-            int currentWeight = blockInfos.get(sourcePartition).getBlockWeight();
-            blockInfos.get(sourcePartition).setBlockWeight(currentWeight + G.getNodeWeight(n));
+            BlockInformation blockInfo = blockInfos.get(sourcePartition);
 
-            int currentNoNodes = blockInfos.get(sourcePartition).getBlockNoNodes();
-            blockInfos.get(sourcePartition).setBlockNoNodes(currentNoNodes + 1);
+            blockInfo.setBlockWeight(blockInfo.getBlockWeight() + G.getNodeWeight(n));
+            blockInfo.setBlockNoNodes(blockInfo.getBlockNoNodes() + 1);
 
             if (G.getNodeDegree(n) == 0) {
                 singletons.add(n);
@@ -345,11 +343,14 @@ public class CompleteBoundary {
     public void updateLazyValues(BoundaryPair pair) {
         assert pair.lhs != pair.rhs;
 
-        int key = hbp.hash(pair);
+        int key = Objects.hash(pair.k, pair.lhs, pair.rhs);
         if (key != lastKey) {
             BoundaryLookup.DataBoundaryPair dbp = mPairs.get(pair);
+            if (dbp == null) {
+                dbp = new BoundaryLookup.DataBoundaryPair(pair.lhs, pair.rhs);
+                mPairs.put(pair, dbp);
+            }
             if (!dbp.initialized) {
-                mPairs.put(pair, new BoundaryLookup.DataBoundaryPair(pair.lhs, pair.rhs));
                 dbp.initialized = true;
             }
 

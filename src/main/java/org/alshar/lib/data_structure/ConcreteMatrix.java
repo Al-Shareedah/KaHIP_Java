@@ -1,4 +1,7 @@
 package org.alshar.lib.data_structure;
+
+import org.alshar.lib.data_structure.matrix.Matrix;
+
 public class ConcreteMatrix extends Matrix {
 
     private int[][] data;

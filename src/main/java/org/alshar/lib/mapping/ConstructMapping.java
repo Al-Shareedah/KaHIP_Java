@@ -1,6 +1,6 @@
 package org.alshar.lib.mapping;
 import org.alshar.lib.data_structure.GraphAccess;
-import org.alshar.lib.data_structure.Matrix;
+import org.alshar.lib.data_structure.matrix.Matrix;
 import org.alshar.lib.data_structure.priority_queues.MaxNodeHeap;
 import org.alshar.lib.partition.PartitionConfig;
 import org.alshar.lib.tools.QualityMetrics;
@@ -9,7 +9,6 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
-import java.util.*;
 import java.util.stream.IntStream;
 
 public class ConstructMapping {

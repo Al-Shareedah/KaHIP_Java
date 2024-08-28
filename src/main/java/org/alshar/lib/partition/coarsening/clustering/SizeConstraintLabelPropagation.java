@@ -5,6 +5,7 @@ import org.alshar.lib.partition.coarsening.matching.Matching;
 import org.alshar.lib.tools.RandomFunctions;
 
 import java.util.*;
+import java.util.concurrent.atomic.AtomicInteger;
 
 public class SizeConstraintLabelPropagation extends Matching {
 
@@ -12,7 +13,7 @@ public class SizeConstraintLabelPropagation extends Matching {
 
     @Override
     public void match(PartitionConfig partitionConfig, GraphAccess G, List<Integer> matching,
-                      List<Integer> coarseMapping, int noOfCoarseVertices, List<Integer> permutation) {
+                      List<Integer> coarseMapping, AtomicInteger noOfCoarseVertices, List<Integer> permutation) {
         permutation.clear();
         for (int i = 0; i < G.numberOfNodes(); i++) {
             permutation.add(i);
@@ -22,7 +23,9 @@ public class SizeConstraintLabelPropagation extends Matching {
         for (int i = 0; i < G.numberOfNodes(); i++) {
             coarseMapping.add(i);
         }
-        noOfCoarseVertices = 0;
+
+        // Set the initial value of noOfCoarseVertices to 0
+        noOfCoarseVertices.set(0);
 
         if (partitionConfig.isEnsembleClusterings()) {
             ensembleClusterings(partitionConfig, G, matching, coarseMapping, noOfCoarseVertices, permutation);
@@ -31,8 +34,9 @@ public class SizeConstraintLabelPropagation extends Matching {
         }
     }
 
+
     private void matchInternal(PartitionConfig partitionConfig, GraphAccess G, List<Integer> matching,
-                               List<Integer> coarseMapping, int noOfCoarseVertices, List<Integer> permutation) {
+                               List<Integer> coarseMapping, AtomicInteger noOfCoarseVertices, List<Integer> permutation) {
         int numNodes = G.numberOfNodes();
         List<Integer> clusterId = new ArrayList<>(numNodes);
         for (int i = 0; i < numNodes; i++) {
@@ -47,7 +51,7 @@ public class SizeConstraintLabelPropagation extends Matching {
     }
 
     private void ensembleClusterings(PartitionConfig partitionConfig, GraphAccess G, List<Integer> matching,
-                                     List<Integer> coarseMapping, int noOfCoarseVertices, List<Integer> permutation) {
+                                     List<Integer> coarseMapping, AtomicInteger noOfCoarseVertices, List<Integer> permutation) {
         int runs = partitionConfig.getNumberOfClusterings();
         int numNodes = G.numberOfNodes();
         List<Integer> curCluster = new ArrayList<>(Collections.nCopies(numNodes, 0));
@@ -58,7 +62,7 @@ public class SizeConstraintLabelPropagation extends Matching {
             PartitionConfig config = new PartitionConfig(partitionConfig);
             config.setClusterCoarseningFactor(newCf);
 
-            int curNoBlocks = 0;
+            AtomicInteger curNoBlocks = new AtomicInteger(0);
 
             // Calculate the block upper bound
             double blockUpperbound = Math.ceil(partitionConfig.getUpperBoundPartition() / (double) partitionConfig.getClusterCoarseningFactor());
@@ -72,7 +76,7 @@ public class SizeConstraintLabelPropagation extends Matching {
                 for (int node = 0; node < numNodes; node++) {
                     ensembleCluster.set(node, curCluster.get(node));
                 }
-                noOfCoarseVertices = curNoBlocks;
+                noOfCoarseVertices.set(curNoBlocks.get());
             }
             newCf = RandomFunctions.nextInt(10, 30);
         }
@@ -82,24 +86,25 @@ public class SizeConstraintLabelPropagation extends Matching {
 
 
     private void ensembleTwoClusterings(GraphAccess G, List<Integer> lhs, List<Integer> rhs,
-                                        List<Integer> output, int noOfCoarseVertices) {
+                                        List<Integer> output, AtomicInteger noOfCoarseVertices) {
         Map<EnsemblePair, DataEnsemblePair> newMapping = new HashMap<>();
-        noOfCoarseVertices = 0;
+        noOfCoarseVertices.set(0); // Initialize to 0
         for (int node = 0; node < lhs.size(); node++) {
             EnsemblePair curPair = new EnsemblePair(lhs.get(node), rhs.get(node), G.numberOfNodes());
 
             if (!newMapping.containsKey(curPair)) {
-                newMapping.put(curPair, new DataEnsemblePair(noOfCoarseVertices++));
+                newMapping.put(curPair, new DataEnsemblePair(noOfCoarseVertices.getAndIncrement()));
             }
 
             output.set(node, newMapping.get(curPair).getMapping());
         }
 
-        noOfCoarseVertices = newMapping.size();
+        noOfCoarseVertices.set(newMapping.size()); // Update with the final size
     }
 
+
     private void labelPropagation(PartitionConfig partitionConfig, GraphAccess G,
-                                  double blockUpperbound, List<Integer> clusterId, int noOfBlocks) {
+                                  double blockUpperbound, List<Integer> clusterId, AtomicInteger noOfBlocks) {
         // Initialization
         int numNodes = G.numberOfNodes();
         List<Integer> hashMap = new ArrayList<>(Collections.nCopies(numNodes, 0));
@@ -165,12 +170,12 @@ public class SizeConstraintLabelPropagation extends Matching {
     }
 
     private void remapClusterIds(PartitionConfig partitionConfig, GraphAccess G,
-                                 List<Integer> clusterId, int noOfCoarseVertices) {
+                                 List<Integer> clusterId, AtomicInteger noOfCoarseVertices) {
         remapClusterIds(partitionConfig, G, clusterId, noOfCoarseVertices, false);
     }
 
     private void remapClusterIds(PartitionConfig partitionConfig, GraphAccess G,
-                                 List<Integer> clusterId, int noOfCoarseVertices, boolean applyToGraph) {
+                                 List<Integer> clusterId, AtomicInteger noOfCoarseVertices, boolean applyToGraph) {
         Map<Integer, Integer> remap = new HashMap<>();
         int curNoClusters = 0;
 
@@ -191,7 +196,7 @@ public class SizeConstraintLabelPropagation extends Matching {
             G.setPartitionCount(curNoClusters);
         }
 
-        noOfCoarseVertices = curNoClusters;
+        noOfCoarseVertices.set(curNoClusters);
     }
 
     private static class EnsemblePair {

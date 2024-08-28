@@ -9,6 +9,7 @@ import org.alshar.lib.partition.uncoarsening.refinement.quotient_graph_refinemen
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.concurrent.atomic.AtomicInteger;
 
 public class Contraction {
 
@@ -19,7 +20,7 @@ public class Contraction {
                          GraphAccess coarser,
                          List<Integer> edgeMatching,
                          List<Integer> coarseMapping,
-                         int noOfCoarseVertices,
+                         AtomicInteger noOfCoarseVertices,
                          List<Integer> permutation) {
 
         if (partitionConfig.getMatchingType() == MatchingType.CLUSTER_COARSENING) {
@@ -28,7 +29,7 @@ public class Contraction {
         }
 
         if (partitionConfig.isCombine()) {
-            coarser.resizeSecondPartitionIndex(noOfCoarseVertices);
+            coarser.resizeSecondPartitionIndex(noOfCoarseVertices.get());
         }
 
         List<Integer> newEdgeTargets = new ArrayList<>(finer.numberOfEdges());
@@ -36,9 +37,9 @@ public class Contraction {
             newEdgeTargets.add(coarseMapping.get(finer.getEdgeTarget(e)));
         }
 
-        List<Integer> edgePositions = new ArrayList<>(Collections.nCopies(noOfCoarseVertices, -1)); // -1 represents UNDEFINED_EDGE
+        List<Integer> edgePositions = new ArrayList<>(Collections.nCopies(noOfCoarseVertices.get(), -1)); // -1 represents UNDEFINED_EDGE
 
-        coarser.startConstruction(noOfCoarseVertices, finer.numberOfEdges());
+        coarser.startConstruction(noOfCoarseVertices.get(), finer.numberOfEdges());
 
         int curNoVertices = 0;
 
@@ -77,7 +78,7 @@ public class Contraction {
         }
 
         // Assertions and finalization
-        assert curNoVertices == noOfCoarseVertices;
+        assert curNoVertices == noOfCoarseVertices.get();
         coarser.finishConstruction();
     }
 
@@ -107,11 +108,11 @@ public class Contraction {
                                    GraphAccess coarser,
                                    List<Integer> edgeMatching,
                                    List<Integer> coarseMapping,
-                                   int noOfCoarseVertices,
+                                   AtomicInteger noOfCoarseVertices,
                                    List<Integer> permutation) {
 
         if (partitionConfig.isCombine()) {
-            coarser.resizeSecondPartitionIndex(noOfCoarseVertices);
+            coarser.resizeSecondPartitionIndex(noOfCoarseVertices.get());
         }
 
         List<Integer> partitionMap = new ArrayList<>(finer.numberOfNodes());
@@ -122,10 +123,10 @@ public class Contraction {
             finer.setPartitionIndex(node, coarseMapping.get(node));
         }
 
-        finer.setPartitionCount(noOfCoarseVertices);
+        finer.setPartitionCount(noOfCoarseVertices.get());
 
         CompleteBoundary boundary = new CompleteBoundary(finer);
-        boundary.fastComputeQuotientGraph(coarser, noOfCoarseVertices);
+        boundary.fastComputeQuotientGraph(coarser, noOfCoarseVertices.get());
 
         finer.setPartitionCount(k);
         for (int node = 0; node < finer.numberOfNodes(); node++) {
@@ -143,7 +144,7 @@ public class Contraction {
                                     GraphAccess coarser,
                                     List<Integer> edgeMatching,
                                     List<Integer> coarseMapping,
-                                    int noOfCoarseVertices,
+                                    AtomicInteger noOfCoarseVertices,
                                     List<Integer> permutation) {
 
         if (partitionConfig.getMatchingType() == MatchingType.CLUSTER_COARSENING) {
@@ -156,13 +157,13 @@ public class Contraction {
             newEdgeTargets.add(coarseMapping.get(finer.getEdgeTarget(e)));
         }
 
-        List<Integer> edgePositions = new ArrayList<>(Collections.nCopies(noOfCoarseVertices, -1)); // UNDEFINED_EDGE
+        List<Integer> edgePositions = new ArrayList<>(Collections.nCopies(noOfCoarseVertices.get(), -1)); // UNDEFINED_EDGE
 
         coarser.setPartitionCount(finer.getPartitionCount());
-        coarser.startConstruction(noOfCoarseVertices, finer.numberOfEdges());
+        coarser.startConstruction(noOfCoarseVertices.get(), finer.numberOfEdges());
 
         if (partitionConfig.isCombine()) {
-            coarser.resizeSecondPartitionIndex(noOfCoarseVertices);
+            coarser.resizeSecondPartitionIndex(noOfCoarseVertices.get());
         }
 
         int curNoVertices = 0;
@@ -203,7 +204,7 @@ public class Contraction {
         }
 
         // Assertions and finalization
-        assert curNoVertices == noOfCoarseVertices;
+        assert curNoVertices == noOfCoarseVertices.get();
         coarser.finishConstruction();
     }
 }

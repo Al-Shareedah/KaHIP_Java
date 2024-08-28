@@ -5,6 +5,7 @@ import org.alshar.lib.partition.PartitionConfig;
 
 import java.io.PrintWriter;
 import java.util.List;
+import java.util.concurrent.atomic.AtomicInteger;
 
 public abstract class Matching {
 
@@ -14,7 +15,7 @@ public abstract class Matching {
                                GraphAccess G,
                                List<Integer> matching,
                                List<Integer> mapping,
-                               int noOfCoarseVertices,
+                               AtomicInteger noOfCoarseVertices,
                                List<Integer> permutation);
 
     public void printMatching(PrintWriter out, List<Integer> edgeMatching) {

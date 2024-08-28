@@ -27,6 +27,9 @@ public class GraphPartitioner {
     private int rndBal;
 
     public GraphPartitioner() {
+        this.globalK = 1685382481;
+        this.globalUpperBound = 6;
+        this.rndBal = 0;
     }
 
     public void performPartitioning(PartitionConfig config, GraphAccess G) {
@@ -263,7 +266,7 @@ public class GraphPartitioner {
 
     private void singleRun(PartitionConfig config, GraphAccess G) {
         for (int i = 1; i <= config.getGlobalCycleIterations(); i++) {
-            System.out.println("vcycle " + i + " of " + config.getGlobalCycleIterations());
+            //System.out.println("vcycle " + i + " of " + config.getGlobalCycleIterations());
 
             if (config.isUseWcycles() || config.isUseFullMultigrid()) {
                 WCyclePartitioner wPartitioner = new WCyclePartitioner();

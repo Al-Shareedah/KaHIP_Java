@@ -52,7 +52,7 @@ public class InitialPartitioning {
 
         int repsToDo = 2;
         if (config.getK() > 1) {
-            repsToDo = (int) Math.max(Math.ceil(config.getInitialPartitioningRepetitions() / Math.log(config.getK())), 2);
+            repsToDo = (int) Math.max(Math.ceil(config.getInitialPartitioningRepetitions() / (Math.log(config.getK()) / Math.log(2))), 2);
         }
 
         if (config.getInitialPartitioningRepetitions() == 0) {
@@ -63,8 +63,8 @@ public class InitialPartitioning {
             repsToDo = Math.min(config.getMinipreps(), repsToDo);
         }
 
-        System.out.println("Number of initial partitioning repetitions = " + repsToDo);
-        System.out.println("Number of nodes for partition = " + G.numberOfNodes());
+        //System.out.println("Number of initial partitioning repetitions = " + repsToDo);
+        //System.out.println("Number of nodes for partition = " + G.numberOfNodes());
 
         if (!((config.isGraphAlreadyPartitioned() && config.isNoNewInitialPartitioning()) || config.isOmitGivenPartitioning())) {
             for (int rep = 0; rep < repsToDo; rep++) {

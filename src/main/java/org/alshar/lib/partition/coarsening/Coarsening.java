@@ -11,12 +11,13 @@ import org.alshar.lib.partition.coarsening.EdgeRatings;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.atomic.AtomicInteger;
 
 public class Coarsening {
     public Coarsening() {}
 
     public void performCoarsening(PartitionConfig partitionConfig, GraphAccess G, GraphHierarchy hierarchy) {
-        int noOfCoarserVertices = G.numberOfNodes();
+        AtomicInteger noOfCoarserVertices = new AtomicInteger(G.numberOfNodes());
         int noOfFinerVertices = G.numberOfNodes();
 
         EdgeRatings rating = new EdgeRatings(partitionConfig);
@@ -47,7 +48,7 @@ public class Coarsening {
         CoarseningConfigurator coarseningConfig = new CoarseningConfigurator();
 
         int level = 0;
-        boolean contractionStop;
+        boolean contractionStop = false;
         do {
             GraphAccess coarser = new GraphAccess();
             coarseMapping = new ArrayList<>();
@@ -73,11 +74,11 @@ public class Coarsening {
             hierarchy.pushBack(finer, coarseMapping);
             contractionStop = coarseningStopRule.stop(noOfFinerVertices, noOfCoarserVertices);
 
-            noOfFinerVertices = noOfCoarserVertices;
+            noOfFinerVertices = noOfCoarserVertices.get();
             finer = coarser;
 
             level++;
-        } while (!contractionStop);
+        } while (contractionStop);
 
         hierarchy.pushBack(finer, null); // append the last created level
 

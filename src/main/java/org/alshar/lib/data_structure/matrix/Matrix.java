@@ -1,4 +1,4 @@
-package org.alshar.lib.data_structure;
+package org.alshar.lib.data_structure.matrix;
 public abstract class Matrix {
 
     protected int dimX;

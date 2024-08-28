@@ -1,5 +1,6 @@
 package org.alshar.lib.partition;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 import org.alshar.lib.enums.*;
@@ -8,8 +9,8 @@ public class PartitionConfig {
 
 
     public PartitionConfig() {
-        this.groupSizes = new ArrayList<>();
-        this.distances = new ArrayList<>();
+        this.groupSizes = new ArrayList<>(List.of(0));
+        this.distances = new ArrayList<>(List.of(0));
     }
     // Copy constructor
     public PartitionConfig(PartitionConfig other) {
@@ -188,7 +189,7 @@ public class PartitionConfig {
         this.clusterUpperbound = other.clusterUpperbound;
 
         // Initial Partitioning
-        this.targetWeights = new ArrayList<>(other.targetWeights);
+        this.targetWeights = other.targetWeights != null ? new ArrayList<>(other.targetWeights) : new ArrayList<>(List.of(0));
         this.initialBipartitioning = other.initialBipartitioning;
         this.growTarget = other.growTarget;
 
@@ -569,7 +570,8 @@ public class PartitionConfig {
     // variables controlling the size of the blocks during
     // multilevel recursive bisection
     // (for the case where k is not a power of 2)
-    public List<Integer> targetWeights;
+    public List<Integer> targetWeights = new ArrayList<>(List.of(0));
+
 
     public boolean initialBipartitioning;
 
@@ -605,9 +607,9 @@ public class PartitionConfig {
 
     public DistanceConstructionAlgorithm distanceConstructionAlgorithm;
 
-    public List<Integer> groupSizes;
+    public List<Integer> groupSizes = new ArrayList<>(List.of(0));
 
-    public List<Integer> distances;
+    public List<Integer> distances = new ArrayList<>(List.of(0));
 
     public int searchSpaceS;
 
@@ -624,7 +626,7 @@ public class PartitionConfig {
 
     public boolean disableReductions;
 
-    public List<NestedDissectionReductionType> reductionOrder;
+    public List<NestedDissectionReductionType> reductionOrder = new ArrayList<>(Collections.nCopies(NestedDissectionReductionType.NUM_TYPES.getValue(), NestedDissectionReductionType.SIMPLICIAL_NODES));
 
     public double convergenceFactor;
 

@@ -8,6 +8,8 @@ import org.alshar.lib.partition.coarsening.matching.Matching;
 import org.alshar.lib.tools.RandomFunctions;
 
 import java.util.*;
+import java.util.concurrent.atomic.AtomicInteger;
+import java.util.concurrent.atomic.AtomicReference;
 
 public class GPAMatching extends Matching {
 
@@ -20,7 +22,7 @@ public class GPAMatching extends Matching {
                       GraphAccess G,
                       List<Integer> edgeMatching,
                       List<Integer> coarseMapping,
-                      int noOfCoarseVertices,
+                      AtomicInteger noOfCoarseVertices,
                       List<Integer> permutation) {
 
         System.out.println("matching using gpa");
@@ -35,7 +37,7 @@ public class GPAMatching extends Matching {
             coarseMapping.add(-1);
         }
 
-        noOfCoarseVertices = 0;
+        noOfCoarseVertices.set(0);
 
         List<Integer> edgePermutation = new ArrayList<>(G.numberOfEdges());
         List<Integer> sources = new ArrayList<>(Collections.nCopies(G.numberOfEdges(), -1));
@@ -48,7 +50,7 @@ public class GPAMatching extends Matching {
             RandomFunctions.permutateEntries(gpaPermConfig, edgePermutation, false);
         }
 
-        edgePermutation.sort(Comparator.comparingDouble(G::getEdgeRating));
+        edgePermutation.sort(new CompareRating(G));
 
         PathSet pathSet = new PathSet(G, partitionConfig);
 
@@ -79,7 +81,7 @@ public class GPAMatching extends Matching {
         extractPathsApplyMatching(G, sources, edgeMatching, pathSet);
 
         // Construct the coarse mapping
-        noOfCoarseVertices = 0;
+        noOfCoarseVertices.set(0);
         if (!partitionConfig.isGraphAlreadyPartitioned()) {
             for (int n = 0; n < G.numberOfNodes(); n++) {
                 if (partitionConfig.isCombine() &&
@@ -88,12 +90,12 @@ public class GPAMatching extends Matching {
                 }
 
                 if (n < edgeMatching.get(n)) {
-                    coarseMapping.set(n, noOfCoarseVertices);
-                    coarseMapping.set(edgeMatching.get(n), noOfCoarseVertices);
-                    noOfCoarseVertices++;
+                    coarseMapping.set(n, noOfCoarseVertices.get());
+                    coarseMapping.set(edgeMatching.get(n), noOfCoarseVertices.get());
+                    noOfCoarseVertices.incrementAndGet();
                 } else if (n == edgeMatching.get(n)) {
-                    coarseMapping.set(n, noOfCoarseVertices);
-                    noOfCoarseVertices++;
+                    coarseMapping.set(n, noOfCoarseVertices.get());
+                    noOfCoarseVertices.incrementAndGet();
                 }
             }
         } else {
@@ -108,16 +110,17 @@ public class GPAMatching extends Matching {
                 }
 
                 if (n < edgeMatching.get(n)) {
-                    coarseMapping.set(n, noOfCoarseVertices);
-                    coarseMapping.set(edgeMatching.get(n), noOfCoarseVertices);
-                    noOfCoarseVertices++;
+                    coarseMapping.set(n, noOfCoarseVertices.get());
+                    coarseMapping.set(edgeMatching.get(n), noOfCoarseVertices.get());
+                    noOfCoarseVertices.incrementAndGet();
                 } else if (n == edgeMatching.get(n)) {
-                    coarseMapping.set(n, noOfCoarseVertices);
-                    noOfCoarseVertices++;
+                    coarseMapping.set(n, noOfCoarseVertices.get());
+                    noOfCoarseVertices.incrementAndGet();
                 }
             }
         }
     }
+
 
     private void init(GraphAccess G,
                       PartitionConfig partitionConfig,
@@ -162,21 +165,23 @@ public class GPAMatching extends Matching {
                 // Handling cycles
                 List<Integer> aMatching = new ArrayList<>();
                 List<Integer> aSecondMatching = new ArrayList<>();
-                Queue<Integer> unpackedCycle = new ArrayDeque<>();
+                Deque<Integer> unpackedCycle = new ArrayDeque<>();
                 unpackPath(p, pathSet, unpackedCycle);
 
-                int first = unpackedCycle.poll();
+                int first = unpackedCycle.pollFirst();  // Equivalent to pop_front() in C++
 
-                maximumWeightMatching(G, unpackedCycle, aMatching, 0.0);
+                AtomicReference<Double> matchingRating = new AtomicReference<>(0.0);
+                maximumWeightMatching(G, unpackedCycle, aMatching, matchingRating);
 
-                unpackedCycle.add(first);
-                int last = unpackedCycle.poll();
+                unpackedCycle.addFirst(first); // Equivalent to push_front() in C++
+                int last = unpackedCycle.pollLast(); // Equivalent to pop_back() in C++
 
-                maximumWeightMatching(G, unpackedCycle, aSecondMatching, 0.0);
+                AtomicReference<Double> secondMatchingRating = new AtomicReference<>(0.0);
+                maximumWeightMatching(G, unpackedCycle, aSecondMatching, secondMatchingRating);
 
-                unpackedCycle.add(last);
+                unpackedCycle.addLast(last); // Equivalent to push_back() in C++
 
-                if (aMatching.size() > aSecondMatching.size()) {
+                if (matchingRating.get() > secondMatchingRating.get()) {
                     applyMatching(G, aMatching, sources, edgeMatching);
                 } else {
                     applyMatching(G, aSecondMatching, sources, edgeMatching);
@@ -204,12 +209,15 @@ public class GPAMatching extends Matching {
                 }
                 unpackPath(p, pathSet, unpackedPath);
 
-                maximumWeightMatching(G, unpackedPath, aMatching, 0.0);
+                AtomicReference<Double> finalRating = new AtomicReference<>(0.0);
+                maximumWeightMatching(G, unpackedPath, aMatching, finalRating);
 
                 applyMatching(G, aMatching, sources, edgeMatching);
             }
         }
     }
+
+
 
     private void applyMatching(GraphAccess G,
                                List<Integer> matchedEdges,
@@ -256,7 +264,7 @@ public class GPAMatching extends Matching {
     private <T extends Collection<Integer>> void maximumWeightMatching(GraphAccess G,
                                                                        T unpackedPath,
                                                                        List<Integer> matchedEdges,
-                                                                       double finalRating) {
+                                                                       AtomicReference<Double> finalRating) {
         List<Integer> unpackedPathList = new ArrayList<>(unpackedPath);
         int k = unpackedPath.size();
         if (k == 1) {
@@ -287,9 +295,9 @@ public class GPAMatching extends Matching {
         }
 
         if (decision.get(k - 1)) {
-            finalRating = ratings.get(k - 1);
+            finalRating.set(ratings.get(k - 1));
         } else {
-            finalRating = ratings.get(k - 2);
+            finalRating.set(ratings.get(k - 2));
         }
 
         for (int i = k - 1; i >= 0;) {
@@ -301,4 +309,5 @@ public class GPAMatching extends Matching {
             }
         }
     }
+
 }

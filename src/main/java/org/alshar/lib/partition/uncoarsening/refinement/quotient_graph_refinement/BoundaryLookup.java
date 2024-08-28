@@ -40,12 +40,16 @@ public class BoundaryLookup {
             if (this == o) return true;
             if (o == null || getClass() != o.getClass()) return false;
             BoundaryPair that = (BoundaryPair) o;
-            return (lhs == that.lhs && rhs == that.rhs) || (lhs == that.rhs && rhs == that.lhs);
+            return k == that.k &&
+                    ((lhs == that.lhs && rhs == that.rhs) ||
+                            (lhs == that.rhs && rhs == that.lhs));
         }
 
         @Override
         public int hashCode() {
-            return Objects.hash(Math.min(lhs, rhs) * k + Math.max(lhs, rhs));
+            int smaller = Math.min(lhs, rhs);
+            int larger = Math.max(lhs, rhs);
+            return Objects.hash(k, smaller, larger);
         }
     }
 

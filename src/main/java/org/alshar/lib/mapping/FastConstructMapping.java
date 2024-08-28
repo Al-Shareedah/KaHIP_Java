@@ -2,7 +2,7 @@ package org.alshar.lib.mapping;
 import org.alshar.app.BalanceConfiguration;
 import org.alshar.app.Configuration;
 import org.alshar.lib.data_structure.GraphAccess;
-import org.alshar.lib.data_structure.Matrix;
+import org.alshar.lib.data_structure.matrix.Matrix;
 import org.alshar.lib.partition.GraphPartitioner;
 import org.alshar.lib.partition.PartitionConfig;
 import org.alshar.lib.partition.uncoarsening.refinement.quotient_graph_refinement.CompleteBoundary;

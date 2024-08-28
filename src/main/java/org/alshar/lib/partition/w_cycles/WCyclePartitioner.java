@@ -19,6 +19,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.concurrent.atomic.AtomicInteger;
 
 public class WCyclePartitioner {
 
@@ -46,8 +47,8 @@ public class WCyclePartitioner {
         return improvement;
     }
 
-    private int performPartitioningRecursive(PartitionConfig partitionConfig, GraphAccess G, CompleteBoundary[] cBoundary) {
-        int noOfCoarserVertices = G.numberOfNodes();
+    public int performPartitioningRecursive(PartitionConfig partitionConfig, GraphAccess G, CompleteBoundary[] cBoundary) {
+        AtomicInteger noOfCoarserVertices = new AtomicInteger(G.numberOfNodes());
         int noOfFinerVertices = G.numberOfNodes();
         int improvement = 0;
 
@@ -123,8 +124,7 @@ public class WCyclePartitioner {
                     cfg.setSetUpperbound(false);
 
                     double curFactor = partitionConfig.getBalanceFactor() / (deepestLevel - level);
-                    cfg.setUpperBoundPartition((int)(((level != 0 ? 1 : 0) * curFactor + 1.0) * partitionConfig.getUpperBoundPartition()));
-
+                    cfg.setUpperBoundPartition((int) (((level != 0 ? 1 : 0) * curFactor + 1.0) * partitionConfig.getUpperBoundPartition()));
 
                     improvement += performPartitioningRecursive(cfg, coarser, new CompleteBoundary[]{coarserBoundary});
                 }
@@ -148,7 +148,7 @@ public class WCyclePartitioner {
         CompleteBoundary currentBoundary = null;
         if (!partitionConfig.isLabelPropagationRefinement()) {
             currentBoundary = new CompleteBoundary(finer);
-            currentBoundary.buildFromCoarser(coarserBoundary, noOfCoarserVertices, coarseMapping);
+            currentBoundary.buildFromCoarser(coarserBoundary, noOfCoarserVertices.get(), coarseMapping);
         }
 
         PartitionConfig cfg = new PartitionConfig(partitionConfig);

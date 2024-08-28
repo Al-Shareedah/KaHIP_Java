@@ -1,6 +1,6 @@
 package org.alshar.lib.mapping;
 
-import org.alshar.lib.data_structure.Matrix;
+import org.alshar.lib.data_structure.matrix.Matrix;
 import org.alshar.lib.partition.PartitionConfig;
 
 import java.util.*;
