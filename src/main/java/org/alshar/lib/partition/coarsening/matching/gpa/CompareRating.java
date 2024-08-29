@@ -14,10 +14,15 @@ public class CompareRating implements Comparator<Integer> {
 
     @Override
     public int compare(Integer left, Integer right) {
-        // Fetch the ratings associated with the edge IDs `left` and `right`
         double leftRating = G.getEdgeRating(left);
         double rightRating = G.getEdgeRating(right);
-        // Note: We use descending order, which matches the original C++ logic
-        return Double.compare(rightRating, leftRating);
+
+        if (leftRating > rightRating) {
+            return -1;  // left should come before right (higher rating first)
+        } else if (leftRating < rightRating) {
+            return 1;  // right should come before left (lower rating first)
+        } else {
+            return 0;  // Ratings are equal, no tie-breaking
+        }
     }
 }

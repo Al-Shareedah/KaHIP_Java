@@ -166,7 +166,10 @@ public class MaxNodeHeap implements PriorityQueueInterface {
         int queueIdx = elementIndex.get(node);
         int heapIdx = elements.get(queueIdx).getIndex();
         elements.get(queueIdx).setKey(newGain);
-        heap.get(heapIdx).setValue(newGain);
+        // Replace the old entry with a new one with the updated key
+        Map.Entry<Integer, Integer> oldEntry = heap.get(heapIdx);
+        Map.Entry<Integer, Integer> newEntry = new AbstractMap.SimpleEntry<>(newGain, oldEntry.getValue());
+        heap.set(heapIdx, newEntry);
         siftDown(heapIdx);
     }
 
@@ -175,7 +178,10 @@ public class MaxNodeHeap implements PriorityQueueInterface {
         int queueIdx = elementIndex.get(node);
         int heapIdx = elements.get(queueIdx).getIndex();
         elements.get(queueIdx).setKey(newKey);
-        heap.get(heapIdx).setValue(newKey);
+        // Replace the old entry with a new one with the updated key
+        Map.Entry<Integer, Integer> oldEntry = heap.get(heapIdx);
+        Map.Entry<Integer, Integer> newEntry = new AbstractMap.SimpleEntry<>(newKey, oldEntry.getValue());
+        heap.set(heapIdx, newEntry);
         siftUp(heapIdx);
     }
 
@@ -203,7 +209,17 @@ public class MaxNodeHeap implements PriorityQueueInterface {
         if (pos > 0) {
             int parentPos = (pos - 1) / 2;
             if (heap.get(parentPos).getKey() < heap.get(pos).getKey()) {
-                swapElements(parentPos, pos);
+                // Swap the elements in the heap
+                Collections.swap(heap, parentPos, pos);
+
+                // Update the indices in the elements list
+                int elementPos = heap.get(pos).getValue();
+                elements.get(elementPos).setIndex(pos);
+
+                elementPos = heap.get(parentPos).getValue();
+                elements.get(elementPos).setIndex(parentPos);
+
+                // Recursively sift up
                 siftUp(parentPos);
             }
         }
@@ -213,20 +229,40 @@ public class MaxNodeHeap implements PriorityQueueInterface {
         int curKey = heap.get(pos).getKey();
         int lhsChild = 2 * pos + 1;
         int rhsChild = 2 * pos + 2;
+
         if (rhsChild < heap.size()) {
             int lhsKey = heap.get(lhsChild).getKey();
             int rhsKey = heap.get(rhsChild).getKey();
 
             if (lhsKey < curKey && rhsKey < curKey) {
-                return;
+                return; // Heap property is satisfied
             } else {
+                // Determine which child to swap with (the larger one in a max heap)
                 int swapPos = lhsKey > rhsKey ? lhsChild : rhsChild;
-                swapElements(pos, swapPos);
+                Collections.swap(heap, pos, swapPos);
+
+                // Update the indices in the elements list
+                int elementPos = heap.get(pos).getValue();
+                elements.get(elementPos).setIndex(pos);
+
+                elementPos = heap.get(swapPos).getValue();
+                elements.get(elementPos).setIndex(swapPos);
+
+                // Recursively sift down
                 siftDown(swapPos);
             }
         } else if (lhsChild < heap.size()) {
             if (heap.get(pos).getKey() < heap.get(lhsChild).getKey()) {
-                swapElements(pos, lhsChild);
+                Collections.swap(heap, pos, lhsChild);
+
+                // Update the indices in the elements list
+                int elementPos = heap.get(pos).getValue();
+                elements.get(elementPos).setIndex(pos);
+
+                elementPos = heap.get(lhsChild).getValue();
+                elements.get(elementPos).setIndex(lhsChild);
+
+                // Recursively sift down
                 siftDown(lhsChild);
             }
         }
@@ -238,6 +274,14 @@ public class MaxNodeHeap implements PriorityQueueInterface {
         int elementPos2 = heap.get(pos2).getValue();
         elements.get(elementPos1).setIndex(pos1);
         elements.get(elementPos2).setIndex(pos2);
+    }
+    private void checkForNegativeIndices(String operation) {
+        for (Map.Entry<Integer, Integer> heapEntry : heap) {
+            if (heapEntry.getValue() < 0) {
+                System.out.println("Negative index found after " + operation + ":");
+                System.out.println("Key: " + heapEntry.getKey() + ", Value (index): " + heapEntry.getValue());
+            }
+        }
     }
 }
 

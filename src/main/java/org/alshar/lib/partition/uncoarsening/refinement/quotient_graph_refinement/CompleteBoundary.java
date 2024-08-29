@@ -343,7 +343,7 @@ public class CompleteBoundary {
     public void updateLazyValues(BoundaryPair pair) {
         assert pair.lhs != pair.rhs;
 
-        int key = Objects.hash(pair.k, pair.lhs, pair.rhs);
+        int key = new BoundaryLookup.HashBoundaryPair().hash(pair);
         if (key != lastKey) {
             BoundaryLookup.DataBoundaryPair dbp = mPairs.get(pair);
             if (dbp == null) {

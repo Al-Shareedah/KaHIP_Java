@@ -112,22 +112,6 @@ public class TwoWayFM extends TwoWayRefinement {
                     fromQueue, toQueue);
 
 
-            // Check for negative keys in the heap of fromQueue[0] and toQueue[0]
-            PriorityQueueInterface[] queuesToCheck = {fromQueue[0], toQueue[0]};
-
-            for (PriorityQueueInterface queue : queuesToCheck) {
-                if (queue instanceof MaxNodeHeap) {
-                    MaxNodeHeap heapQueue = (MaxNodeHeap) queue;
-                    for (Map.Entry<Integer, Integer> heapEntry : heapQueue.heap) {
-                        if (heapEntry.getValue() < 0) {
-                            System.out.println("Negative key found in heap:");
-                            System.out.println("Key: " + heapEntry.getKey() + ", Value (index): " + heapEntry.getValue());
-                        }
-                    }
-                }
-            }
-
-
             if (fromQueue[0] != null && !fromQueue[0].isEmpty()) {
                 int gain = fromQueue[0].maxValue();
                 int node = fromQueue[0].deleteMax();
@@ -162,7 +146,7 @@ public class TwoWayFM extends TwoWayRefinement {
                     bestCut = cut;
                     minCutIndex = numberOfSwaps;
                 }
-
+                transpositions.add(node);
                 // Safely check and update the moved index
                 VertexMovedHashtable.MovedIndex movedIndex = movedIdx.get(node);
                 if (movedIndex == null) {

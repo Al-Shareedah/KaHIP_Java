@@ -107,7 +107,7 @@ public class QuotientGraphRefinement extends Refinement {
         List<Integer> lhsBndNodes = setupStartNodes(G, lhs, bp, boundary);
         List<Integer> rhsBndNodes = setupStartNodes(G, rhs, bp, boundary);
 
-        somethingChanged = new boolean[]{false};
+        somethingChanged[0] = false;
         int improvement = 0;
 
         QualityMetrics qm = new QualityMetrics();
@@ -125,7 +125,43 @@ public class QuotientGraphRefinement extends Refinement {
             improvement += flowImprovement;
         }
 
-        // Additional logic for handling overloaded blocks
+        // Check if only one block is overloaded
+        boolean onlyOneBlockIsOverloaded = boundary.getBlockWeight(lhs) > config.getUpperBoundPartition();
+        onlyOneBlockIsOverloaded = onlyOneBlockIsOverloaded || boundary.getBlockWeight(rhs) > config.getUpperBoundPartition();
+        onlyOneBlockIsOverloaded = onlyOneBlockIsOverloaded &&
+                (boundary.getBlockWeight(lhs) <= config.getUpperBoundPartition() ||
+                        boundary.getBlockWeight(rhs) <= config.getUpperBoundPartition());
+
+        if (onlyOneBlockIsOverloaded) {
+            PartitionConfig cfg = new PartitionConfig(config);
+            cfg.setSoftRebalance(true);
+            cfg.setRebalance(false);
+
+            lhsBndNodes = setupStartNodes(G, lhs, bp, boundary);
+            rhsBndNodes = setupStartNodes(G, rhs, bp, boundary);
+
+            improvement += pairWiseRefinement.performRefinement(cfg, G, boundary, lhsBndNodes, rhsBndNodes, bp, lhsPartWeight, rhsPartWeight, initialCutValue, somethingChanged);
+            assert improvement >= 0 || config.isRebalance();
+
+            if (!config.isDisableHardRebalance() && !config.isKaffpaPerfectlyBalancedRefinement() && !config.isInitialBipartitioning()) {
+                onlyOneBlockIsOverloaded = boundary.getBlockWeight(lhs) > config.getUpperBoundPartition();
+                onlyOneBlockIsOverloaded = onlyOneBlockIsOverloaded || boundary.getBlockWeight(rhs) > config.getUpperBoundPartition();
+                onlyOneBlockIsOverloaded = onlyOneBlockIsOverloaded &&
+                        (boundary.getBlockWeight(lhs) <= config.getUpperBoundPartition() ||
+                                boundary.getBlockWeight(rhs) <= config.getUpperBoundPartition());
+
+                if (onlyOneBlockIsOverloaded) {
+                    cfg.setSoftRebalance(true);
+                    cfg.setRebalance(true);
+
+                    lhsBndNodes = setupStartNodes(G, lhs, bp, boundary);
+                    rhsBndNodes = setupStartNodes(G, rhs, bp, boundary);
+
+                    improvement += pairWiseRefinement.performRefinement(cfg, G, boundary, lhsBndNodes, rhsBndNodes, bp, lhsPartWeight, rhsPartWeight, initialCutValue, somethingChanged);
+                    assert improvement >= 0 || config.isRebalance();
+                }
+            }
+        }
 
         return improvement;
     }

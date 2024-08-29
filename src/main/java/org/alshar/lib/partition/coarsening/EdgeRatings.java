@@ -155,7 +155,7 @@ public class EdgeRatings {
                 int targetWeight = G.getNodeWeight(targetNode);
                 int edgeWeight = G.getEdgeWeight(e);
 
-                float rating = 1.0f * edgeWeight * edgeWeight / (targetWeight * sourceWeight);
+                double rating = 1.0 * edgeWeight * edgeWeight / (targetWeight * sourceWeight);
                 G.setEdgeRating(e, rating);
             }
         }
