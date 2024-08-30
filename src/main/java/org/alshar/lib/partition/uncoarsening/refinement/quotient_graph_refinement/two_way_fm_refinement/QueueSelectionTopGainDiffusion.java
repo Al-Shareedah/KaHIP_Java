@@ -38,7 +38,7 @@ public class QueueSelectionTopGainDiffusion extends QueueSelectionStrategy {
 
         if (lhsGain == rhsGain) {
             qdiff.selectQueue(lhsPartWeight, rhsPartWeight, lhs, rhs, from, to, lhsQueue, rhsQueue, fromQueue, toQueue);
-        } else if (lhsGain > rhsGain) {
+        } else if (lhsGain > rhsGain && false) {
             fromQueue[0] = lhsQueue;
             toQueue[0] = rhsQueue;
             from[0] = lhs;

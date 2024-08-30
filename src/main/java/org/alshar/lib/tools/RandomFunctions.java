@@ -6,6 +6,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.Random;
+import java.util.concurrent.ThreadLocalRandom;
 
 public class RandomFunctions {
 
@@ -85,9 +86,12 @@ public class RandomFunctions {
         }
 
         int size = vec.size();
+        ThreadLocalRandom random = ThreadLocalRandom.current();  // Ensure proper random number generation
+
         for (int i = 0; i < size; i++) {
-            int posA = nextInt(0, size - 4);
-            int posB = nextInt(0, size - 4);
+            int posA = random.nextInt(0, size - 3);  // Generate random int in range [0, size-4]
+            int posB = random.nextInt(0, size - 3);  // Generate random int in range [0, size-4]
+
             Collections.swap(vec, posA, posB);
             Collections.swap(vec, posA + 1, posB + 1);
             Collections.swap(vec, posA + 2, posB + 2);
@@ -96,13 +100,15 @@ public class RandomFunctions {
     }
 
     public static <Sometype> void permutateVectorGoodSmall(List<Sometype> vec) {
-        if (vec.size() < 2) return;
+        if (vec.size() < 2) return;  // Return immediately if the vector has fewer than 2 elements
 
         int size = vec.size();
+        ThreadLocalRandom random = ThreadLocalRandom.current();
+
         for (int i = 0; i < size; i++) {
-            int posA = nextInt(0, size - 1);
-            int posB = nextInt(0, size - 1);
-            Collections.swap(vec, posA, posB);
+            int posA = random.nextInt(0, size);  // Generate random int in range [0, size-1]
+            int posB = random.nextInt(0, size);  // Generate random int in range [0, size-1]
+            Collections.swap(vec, posA, posB);   // Swap the elements at posA and posB
         }
     }
 
