@@ -105,25 +105,6 @@ public class TwoWayFM extends TwoWayRefinement {
             }
 
 
-            // Assume there are two partitions (lhs and rhs)
-            int leftCount = 0;
-            int rightCount = 0;
-
-            for (int node1 = 0; node1 < G.numberOfNodes(); node1++) {
-                int partitionIndex = G.getPartitionIndex(node1);
-                if (partitionIndex == 0) {
-                    leftCount++;
-                } else if (partitionIndex == 1) {
-                    rightCount++;
-                }
-            }
-
-            // Print the results
-            System.out.println("Number of nodes in lhs partition: " + leftCount);
-            System.out.println("Number of nodes in rhs partition: " + rightCount);
-
-
-
 
             qSelect.selectQueue(lhsPartWeight, rhsPartWeight,
                     pair.lhs, pair.rhs,
@@ -155,6 +136,15 @@ public class TwoWayFM extends TwoWayRefinement {
                         pair,
                         fromPartWeight, toPartWeight,
                         boundary);
+
+                // Update the original weights since they should reflect the changes
+                if (from[0] == pair.lhs) {
+                    lhsPartWeight = fromPartWeight[0];
+                    rhsPartWeight = toPartWeight[0];
+                } else {
+                    rhsPartWeight = fromPartWeight[0];
+                    lhsPartWeight = toPartWeight[0];
+                }
 
                 cut -= gain;
 
@@ -218,23 +208,15 @@ public class TwoWayFM extends TwoWayRefinement {
                     boundary);
 
 
-            // Assume there are two partitions (lhs and rhs)
-            int leftCount = 0;
-            int rightCount = 0;
-
-            for (int node1 = 0; node1 < G.numberOfNodes(); node1++) {
-                int partitionIndex = G.getPartitionIndex(node1);
-                if (partitionIndex == 0) {
-                    leftCount++;
-                } else if (partitionIndex == 1) {
-                    rightCount++;
-                }
+            // Update the original weights since they should reflect the changes after moving nodes back
+            if (from[0] == pair.lhs) {
+                lhsPartWeight = fromPartWeight[0];
+                rhsPartWeight = toPartWeight[0];
+            } else {
+                rhsPartWeight = fromPartWeight[0];
+                lhsPartWeight = toPartWeight[0];
             }
 
-            // Print the results
-            System.out.println("************* After calling move Node Back ***********");
-            System.out.println("Number of nodes in lhs partition: " + leftCount);
-            System.out.println("Number of nodes in rhs partition: " + rightCount);
         }
 
         // clean up
@@ -438,30 +420,24 @@ public class TwoWayFM extends TwoWayRefinement {
         extDegree[0] = 0;
         boolean updateIsDifficult = false;
 
-        System.out.println("Calculating intExtDegree for node: " + node + " in lhs: " + lhs + " against rhs: " + rhs);
 
         for (int e = G.getFirstEdge(node), end = G.getFirstInvalidEdge(node); e < end; e++) {
             int target = G.getEdgeTarget(e);
             int targetsPartition = G.getPartitionIndex(target);
             int edgeWeight = G.getEdgeWeight(e);
 
-            System.out.println("Processing edge to target: " + target + " in partition: " + targetsPartition + " with weight: " + edgeWeight);
 
             if (targetsPartition == lhs) {
                 intDegree[0] += edgeWeight;
-                System.out.println("Adding to intDegree: " + intDegree[0]);
             } else if (targetsPartition == rhs) {
                 extDegree[0] += edgeWeight;
-                System.out.println("Adding to extDegree: " + extDegree[0]);
             }
 
             if (targetsPartition != lhs && targetsPartition != rhs) {
                 updateIsDifficult = true;
-                System.out.println("Marking update as difficult due to target in partition: " + targetsPartition);
             }
         }
 
-        System.out.println("Final intDegree: " + intDegree[0] + ", extDegree: " + extDegree[0] + ", difficult update: " + updateIsDifficult);
         return updateIsDifficult;
     }
 

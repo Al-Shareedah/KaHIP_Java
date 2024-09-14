@@ -149,11 +149,12 @@ public class GraphPartitioner {
             List<Integer> mappingExtractedToGLhs = new ArrayList<>();
             List<Integer> mappingExtractedToGRhs = new ArrayList<>();
 
-            int weightLhsBlock = 0;
-            int weightRhsBlock = 0;
 
-            extractor.extractTwoBlocks(G, extractedBlockLhs, extractedBlockRhs, mappingExtractedToGLhs, mappingExtractedToGRhs, weightLhsBlock, weightRhsBlock);
+            int[] weights = new int[2];
+            extractor.extractTwoBlocks(G, extractedBlockLhs, extractedBlockRhs, mappingExtractedToGLhs, mappingExtractedToGRhs, weights);
 
+            int weightLhsBlock = weights[0];
+            int weightRhsBlock = weights[1];
             PartitionConfig recConfig = new PartitionConfig(config);
             if (numBlocksLhs > 1) {
                 recConfig.setK(numBlocksLhs);

@@ -15,6 +15,12 @@ public class PartialBoundary {
     public static class IsBoundary {
         public boolean contains;
 
+        // Constructor to initialize with the given value
+        public IsBoundary(boolean contains) {
+            this.contains = contains;
+        }
+
+        // Default constructor (optional)
         public IsBoundary() {
             this.contains = false;
         }
@@ -38,7 +44,17 @@ public class PartialBoundary {
     }
 
     public void insert(int node) {
-        internalBoundary.put(node, new IsBoundary());
+        // Check if the node already exists in the map
+        IsBoundary boundary = internalBoundary.get(node);
+
+        if (boundary == null) {
+            // If it doesn't exist, create a new IsBoundary object with contains = true
+            boundary = new IsBoundary(true);
+            internalBoundary.put(node, boundary);
+        } else {
+            // If it already exists, just set contains to true
+            boundary.contains = true;
+        }
     }
 
     public void deleteNode(int node) {

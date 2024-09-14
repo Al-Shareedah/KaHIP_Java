@@ -5,6 +5,7 @@ import java.time.Instant;
 
 public class Timer {
 
+
     private Instant start;
 
     public Timer() {
@@ -17,7 +18,11 @@ public class Timer {
 
     public double elapsed() {
         Duration duration = Duration.between(start, Instant.now());
-        return duration.toMillis() / 1000.0;
+        return duration.toMillis() / 1000.0;  // Elapsed time in seconds
+    }
+
+    public void printElapsed(String message) {
+        System.out.printf("%s: %.3f seconds%n", message, elapsed());
     }
 }
 

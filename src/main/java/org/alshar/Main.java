@@ -13,9 +13,8 @@ import org.alshar.lib.partition.uncoarsening.refinement.quotient_graph_refinemen
 import org.alshar.lib.tools.QualityMetrics;
 import org.alshar.lib.tools.RandomFunctions;
 import org.alshar.lib.tools.Timer;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
+
+import java.util.*;
 
 import static org.alshar.lib.enums.DistanceConstructionAlgorithm.DIST_CONST_HIERARCHY_ONLINE;
 
@@ -23,13 +22,13 @@ import static org.alshar.lib.enums.DistanceConstructionAlgorithm.DIST_CONST_HIER
 // then press Enter. You can now see whitespace characters in your code.
 public class Main {
     public static void main(String[] args) {
-        args = new String[]{"email.graph", "--k", "4", "--preconfiguration=eco"};
+        args = new String[]{"4elt.graph", "--k", "4", "--preconfiguration=eco"};
         PartitionConfig partitionConfig = new PartitionConfig();
         String[] graphFilename = new String[1];
         boolean isGraphWeighted = false;
         boolean suppressOutput = false;
         boolean recursive = false;
-
+        Timer totalTimer = new Timer();
         int retCode = ParseParameters.parseParameters(args, partitionConfig, isGraphWeighted, suppressOutput, recursive, graphFilename);
 
         if (retCode != 0) {
@@ -110,7 +109,7 @@ public class Main {
         }
 
         // Output the time spent on partitioning
-        System.out.println("Time spent for partitioning: " + t.elapsed() + " ms");
+        t.printElapsed("Time spent for partitioning");
 
 
         int qap = 0;
@@ -175,32 +174,133 @@ public class Main {
             for (int node = 0; node < G.numberOfNodes(); node++) {
                 G.setPartitionIndex(node, permRank.get(G.getPartitionIndex(node)));
             }
+        }
+        // ******************************* done partitioning *****************************************
+        // Output some information about the partition that we have computed
+        System.out.println("cut \t\t" + qm.edgeCut(G));
+        System.out.println("final objective \t" + qm.edgeCut(G));
+        System.out.println("bnd \t\t" + qm.boundaryNodes(G));
+        System.out.println("balance \t" + qm.balance(G));
+        System.out.println("max_comm_vol \t" + qm.maxCommunicationVolume(G));
 
-            // ******************************* done partitioning *****************************************
-            // Output some information about the partition that we have computed
-            System.out.println("cut \t\t" + qm.edgeCut(G));
-            System.out.println("final objective \t" + qm.edgeCut(G));
-            System.out.println("bnd \t\t" + qm.boundaryNodes(G));
-            System.out.println("balance \t" + qm.balance(G));
-            System.out.println("max_comm_vol \t" + qm.maxCommunicationVolume(G));
+        calculateConnectedComponentsAndCCM(G);
 
-            if (partitionConfig.isEnableMapping()) {
-                System.out.println("quadratic assignment objective J(C,D,Pi') = " + qap);
-            }
-
-            // Write the partition to the disk
-            String filename;
-            if (partitionConfig.getFilenameOutput().isEmpty()) {
-                filename = "tmppartition" + partitionConfig.getK();
-            } else {
-                filename = partitionConfig.getFilenameOutput();
-            }
-
-            // Create an instance of GraphIO
-            GraphIO graphIO = new GraphIO();
-            graphIO.writePartition(G, filename);
-
+        if (partitionConfig.isEnableMapping()) {
+            System.out.println("quadratic assignment objective J(C,D,Pi') = " + qap);
         }
 
+        // Write the partition to the disk
+        String filename;
+        if (partitionConfig.getFilenameOutput().isEmpty()) {
+            filename = "tmppartition" + partitionConfig.getK();
+        } else {
+            filename = partitionConfig.getFilenameOutput();
+        }
+
+        // Create an instance of GraphIO
+        GraphIO graphIO = new GraphIO();
+        graphIO.writePartition(G, filename);
+
+        totalTimer.printElapsed("Total execution time");
+
     }
+
+    private static void calculateConnectedComponentsAndCCM(GraphAccess G) {
+        Map<Integer, Set<Integer>> blockNodes = new HashMap<>();
+
+        // Group nodes by their partition/block
+        for (int node = 0; node < G.numberOfNodes(); node++) {
+            int blockId = G.getPartitionIndex(node);
+            blockNodes.computeIfAbsent(blockId, k -> new HashSet<>()).add(node);
+        }
+
+        List<Integer> actualSizes = new ArrayList<>();
+        int totalComponents = 0;  // To accumulate total number of connected components
+
+        // Iterate through each block and calculate its connected components
+        for (Map.Entry<Integer, Set<Integer>> entry : blockNodes.entrySet()) {
+            int blockId = entry.getKey();
+            Set<Integer> nodes = entry.getValue();
+
+            Map<Integer, Boolean> visitedNodes = new HashMap<>();
+            for (Integer node : nodes) {
+                visitedNodes.put(node, false);  // Mark all nodes as unvisited
+            }
+
+            Map<Integer, List<Integer>> connectedComponents = new HashMap<>();
+
+            // Depth-first search to find connected components
+            for (Integer node : nodes) {
+                if (!visitedNodes.get(node)) {
+                    List<Integer> component = new ArrayList<>();
+                    Stack<Integer> stack = new Stack<>();
+                    stack.push(node);
+
+                    // Explore the component using DFS
+                    while (!stack.isEmpty()) {
+                        int u = stack.pop();
+
+                        if (!visitedNodes.get(u)) {
+                            visitedNodes.put(u, true);
+                            component.add(u);
+
+                            for (Integer edge : G.getOutEdges(u)) {
+                                int v = G.getEdgeTarget(edge);
+                                if (G.getPartitionIndex(v) == blockId && !visitedNodes.get(v)) {
+                                    stack.push(v);
+                                }
+                            }
+                        }
+                    }
+
+                    // Store this connected component
+                    connectedComponents.put(node, component);
+                }
+            }
+
+            // Number of connected components for the current block
+            int numComponents = connectedComponents.size();
+            totalComponents += numComponents;  // Accumulate the total number of components
+
+            // Print information for the current block
+            System.out.printf("Block %d has %d nodes and %d components:\n", blockId, nodes.size(), numComponents);
+
+            actualSizes.add(nodes.size());  // Store the size of the block
+        }
+
+        // Print the total number of connected components across all blocks
+        System.out.printf("Total number of connected components across all blocks: %d\n", totalComponents);
+
+        // Calculate CCM based on the desired sizes and actual block sizes
+        calculateCCM(actualSizes, G.numberOfNodes());
+    }
+
+
+    private static void calculateCCM(List<Integer> actualSizes, int totalNodes) {
+        List<Integer> desiredSizes = Arrays.asList(11014, 3304, 991, 297);
+        int totalDifference = 0;
+        int partitionsNotMeetingSize = 0;
+        double totalPercentageOff = 0.0;
+
+        for (int i = 0; i < desiredSizes.size(); i++) {
+            int actualSize = (i < actualSizes.size()) ? actualSizes.get(i) : 0;
+            int difference = Math.abs(desiredSizes.get(i) - actualSize);
+
+            totalDifference += difference;
+
+            if (difference > 0) {
+                partitionsNotMeetingSize++;
+                totalPercentageOff += (double) difference / desiredSizes.get(i) * 100.0;
+            }
+        }
+
+        double ncdm = (double) totalDifference / totalNodes;
+        double percentageNotMeetingSize = (double) partitionsNotMeetingSize / desiredSizes.size() * 100.0;
+        double averagePercentageOff = partitionsNotMeetingSize > 0 ? totalPercentageOff / partitionsNotMeetingSize : 0.0;
+
+        System.out.println("Cardinality Compliance Metric (CCM): " + ncdm);
+        System.out.println("Percentage of partitions not meeting desired size: " + percentageNotMeetingSize + "%");
+        System.out.println("Average percentage by which partitions missed the desired size: " + averagePercentageOff + "%");
+    }
+
 }

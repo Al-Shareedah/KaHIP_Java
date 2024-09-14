@@ -76,6 +76,11 @@ public class GraphIO {
                 G.setNodeWeight(node, weight);
 
                 while (index < tokens.length) {
+                    // Skip empty tokens
+                    if (tokens[index].isEmpty()) {
+                        index++;
+                        continue;
+                    }
                     int target = Integer.parseInt(tokens[index++]);
 
                     // Check for self-loops

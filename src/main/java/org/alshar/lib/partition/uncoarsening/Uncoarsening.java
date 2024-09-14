@@ -49,7 +49,7 @@ public class Uncoarsening {
         }
 
         GraphAccess coarsest = hierarchy.getCoarsest();
-        System.out.println("log> unrolling graph with " + coarsest.numberOfNodes());
+        //System.out.println("log> unrolling graph with " + coarsest.numberOfNodes());
 
         CompleteBoundary finerBoundary = null;
         CompleteBoundary coarserBoundary = null;
@@ -69,7 +69,7 @@ public class Uncoarsening {
 
         while (!hierarchy.isEmpty()) {
             GraphAccess G = hierarchy.popFinerAndProject();
-            System.out.println("log> unrolling graph with " + G.numberOfNodes());
+            //System.out.println("log> unrolling graph with " + G.numberOfNodes());
 
             if (!config.isLabelPropagationRefinement()) {
                 finerBoundary = new CompleteBoundary(G);
@@ -78,7 +78,7 @@ public class Uncoarsening {
 
             double curFactor = factor / (hierarchyDepth - hierarchy.size());
             cfg.setUpperBoundPartition((int)((!hierarchy.isEmpty() ? curFactor : 0) + 1.0 * config.getUpperBoundPartition()));
-            System.out.println("cfg upperbound " + cfg.getUpperBoundPartition());
+            //System.out.println("cfg upperbound " + cfg.getUpperBoundPartition());
             improvement += refine.performRefinement(cfg, G, finerBoundary);
             GraphPartitionAssertions.assertGraphHasKWayPartition(config, G);
 
@@ -124,11 +124,11 @@ public class Uncoarsening {
     }
 
     public int performUncoarseningNodeSeparator(PartitionConfig config, GraphHierarchy hierarchy) {
-        System.out.println("log> starting uncoarsening ---------------");
+        //System.out.println("log> starting uncoarsening ---------------");
         PartitionConfig cfg = new PartitionConfig(config);
         GraphAccess coarsest = hierarchy.getCoarsest();
         QualityMetrics qm = new QualityMetrics();
-        System.out.println("log> unrolling graph with " + coarsest.numberOfNodes());
+        //System.out.println("log> unrolling graph with " + coarsest.numberOfNodes());
 
         if (!config.isSepFmDisabled()) {
             for (int i = 0; i < config.getSepNumFmReps(); i++) {
@@ -160,7 +160,7 @@ public class Uncoarsening {
         GraphAccess toDelete = null;
         while (!hierarchy.isEmpty()) {
             GraphAccess G = hierarchy.popFinerAndProject();
-            System.out.println("log> unrolling graph with " + G.numberOfNodes());
+            //System.out.println("log> unrolling graph with " + G.numberOfNodes());
 
             if (!config.isSepFmDisabled()) {
                 for (int i = 0; i < config.getSepNumFmReps(); i++) {
@@ -214,10 +214,10 @@ public class Uncoarsening {
 
 
     public int performUncoarseningNodeSeparatorFast(PartitionConfig config, GraphHierarchy hierarchy) {
-        System.out.println("log> starting uncoarsening ---------------");
+        //System.out.println("log> starting uncoarsening ---------------");
         PartitionConfig cfg = new PartitionConfig(config);
         GraphAccess coarsest = hierarchy.getCoarsest();
-        System.out.println("log> unrolling graph with " + coarsest.numberOfNodes());
+        //System.out.println("log> unrolling graph with " + coarsest.numberOfNodes());
 
         List<Integer> blockWeights = new ArrayList<>(Collections.nCopies(3, 0));
         PartialBoundary currentSeparator = new PartialBoundary();
@@ -254,7 +254,7 @@ public class Uncoarsening {
         GraphAccess toDelete = null;
         while (!hierarchy.isEmpty()) {
             GraphAccess G = hierarchy.popFinerAndProjectNs(currentSeparator);
-            System.out.println("log> unrolling graph with " + G.numberOfNodes());
+            //System.out.println("log> unrolling graph with " + G.numberOfNodes());
 
             movedOutOfS = new ArrayList<>(Collections.nCopies(G.numberOfNodes(), false));
             if (!config.isSepFmDisabled()) {

@@ -9,7 +9,7 @@ public class VertexMovedHashtable {
     public static final MovedIndex MOVED = new MovedIndex(); // Represents the MOVED state
 
     static {
-        MOVED.index = 1; // Assuming '1' represents MOVED; you can change this value as needed
+        MOVED.index = 0;
     }
 
     public static class MovedIndex {

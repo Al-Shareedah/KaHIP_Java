@@ -122,7 +122,7 @@ public class LocalSearchMapping {
         }
 
         if (totalVolume < oldVolume) {
-            System.out.println("Log> Improvement: " + totalVolume + " " + oldVolume);
+            //System.out.println("Log> Improvement: " + totalVolume + " " + oldVolume);
             return true;
         } else {
             Collections.swap(permRank, swapLhs, swapRhs);

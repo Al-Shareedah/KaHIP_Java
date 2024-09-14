@@ -110,7 +110,7 @@ public class RandomMatching extends Matching {
             }
         }
 
-        System.out.println("log> no of coarse nodes: " + noOfCoarseVertices.get());
+        //System.out.println("log> no of coarse nodes: " + noOfCoarseVertices.get());
     }
 
 }

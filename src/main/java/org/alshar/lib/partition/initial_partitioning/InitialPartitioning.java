@@ -75,7 +75,7 @@ public class InitialPartitioning {
 
                 int curCut = qm.edgeCut(G, partitionMap);
                 if (curCut < bestCut) {
-                    System.out.println("Improved the current initial partitioning from " + bestCut + " to " + curCut);
+                    //System.out.println("Improved the current initial partitioning from " + bestCut + " to " + curCut);
 
                     for (int n = 0; n < G.numberOfNodes(); n++) {
                         bestMap[n] = partitionMap[n];
@@ -93,19 +93,19 @@ public class InitialPartitioning {
 
         G.setPartitionCount(config.getK());
 
-        System.out.println("Initial partitioning took " + t.elapsed() + " ms");
-        System.out.println("Current initial balance " + qm.balance(G));
+        //System.out.println("Initial partitioning took " + t.elapsed() + " ms");
+        //System.out.println("Current initial balance " + qm.balance(G));
 
         if (config.isInitialPartitionOptimize() || config.isCombine()) {
             InitialRefinement iniref = new InitialRefinement();
             iniref.optimize(config, G, bestCut);
         }
 
-        System.out.println("Final current initial partitioning from " + bestCut + " to " + bestCut);
+        //System.out.println("Final current initial partitioning from " + bestCut + " to " + bestCut);
 
         if (!(config.isGraphAlreadyPartitioned() && config.isNoNewInitialPartitioning())) {
-            System.out.println("Final initial cut " + bestCut);
-            System.out.println("Final current initial balance " + qm.balance(G));
+            //System.out.println("Final initial cut " + bestCut);
+            //System.out.println("Final current initial balance " + qm.balance(G));
         }
 
         GraphPartitionAssertions.assertGraphHasKWayPartition(config, G);

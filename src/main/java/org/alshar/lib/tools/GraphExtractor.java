@@ -49,7 +49,7 @@ public class GraphExtractor {
 
     public void extractTwoBlocks(GraphAccess G, GraphAccess extractedBlockLhs, GraphAccess extractedBlockRhs,
                                  List<Integer> mappingLhs, List<Integer> mappingRhs,
-                                 int partitionWeightLhs, int partitionWeightRhs) {
+                                 int[] partitionWeights) {
 
         int lhs = 0;
         int rhs = 1;
@@ -59,19 +59,19 @@ public class GraphExtractor {
         List<Integer> reverseMappingRhs = new ArrayList<>();
         int nodesLhs = 0;
         int nodesRhs = 0;
-        partitionWeightLhs = 0;
-        partitionWeightRhs = 0;
+        partitionWeights[0] = 0;  // partitionWeightLhs
+        partitionWeights[1] = 0;  // partitionWeightRhs
         int dummyNode = G.numberOfNodes() + 1;
 
         for (int node = 0; node < G.numberOfNodes(); node++) {
             if (G.getPartitionIndex(node) == lhs) {
                 reverseMappingLhs.add(nodesLhs++);
                 reverseMappingRhs.add(dummyNode);
-                partitionWeightLhs += G.getNodeWeight(node);
+                partitionWeights[0] += G.getNodeWeight(node);
             } else {
                 reverseMappingRhs.add(nodesRhs++);
                 reverseMappingLhs.add(dummyNode);
-                partitionWeightRhs += G.getNodeWeight(node);
+                partitionWeights[1] += G.getNodeWeight(node);
             }
         }
 

@@ -25,7 +25,7 @@ public class GPAMatching extends Matching {
                       AtomicInteger noOfCoarseVertices,
                       List<Integer> permutation) {
 
-        System.out.println("matching using gpa");
+        //System.out.println("matching using gpa");
 
         permutation.clear();
         edgeMatching.clear();

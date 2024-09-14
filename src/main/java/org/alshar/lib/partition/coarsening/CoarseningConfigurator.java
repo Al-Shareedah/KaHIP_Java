@@ -18,14 +18,14 @@ public class CoarseningConfigurator {
                 break;
             case MATCHING_GPA:
                 edgeMatcher[0] = new GPAMatching();
-                System.out.println("GPA matching");
+                //System.out.println("GPA matching");
                 break;
             case MATCHING_RANDOM_GPA:
-                System.out.println("Random GPA matching");
+                //System.out.println("Random GPA matching");
                 edgeMatcher[0] = new GPAMatching();
                 break;
             case CLUSTER_COARSENING:
-                System.out.println("Cluster coarsening");
+                //System.out.println("Cluster coarsening");
                 edgeMatcher[0] = new SizeConstraintLabelPropagation();
                 break;
         }
@@ -33,7 +33,7 @@ public class CoarseningConfigurator {
         if (partitionConfig.getMatchingType() == MatchingType.MATCHING_RANDOM_GPA
                 && level < partitionConfig.getAggressiveRandomLevels()) {
             edgeMatcher[0] = null;  // Clean up the previous matcher
-            System.out.println("Random matching");
+            //System.out.println("Random matching");
             edgeMatcher[0] = new RandomMatching();
         }
     }

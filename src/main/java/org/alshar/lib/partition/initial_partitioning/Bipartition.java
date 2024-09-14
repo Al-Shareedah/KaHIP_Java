@@ -65,7 +65,7 @@ public class Bipartition extends InitialPartitioner {
                 }
             }
         }
-        System.out.println("Bipartition took " + t.elapsed() + " ms");
+        //System.out.println("Bipartition took " + t.elapsed() + " ms");
     }
 
     @Override

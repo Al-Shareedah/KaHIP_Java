@@ -22,6 +22,7 @@ public class PushRelabel {
     private FlowGraph graph;
 
     public PushRelabel() {
+        queue = new LinkedList<>();
     }
 
     public void init(FlowGraph G, int source, int sink) {
